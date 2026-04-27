@@ -1,0 +1,52 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block title %}支出一覧{% endblock %}
+
+{% block content %}
+<a href="{% url 'expense_create' %}" class="btn btn-primary mb-3">＋ 新規追加</a>
+
+<a href="{% url 'expense_summary' %}" class="btn btn-info mb-3">📊 今月の集計</a>
+
+<a href="{% url 'expense_chart' %}" class="btn btn-warning mb-3">📈 カテゴリ別グラフ</a>
+
+<a href="{% url 'expense_summary_month' 2024 3 %}" class="btn btn-info mb-3">📅 月別集計</a>
+
+<a href="{% url 'expense_filter' %}" class="btn btn-secondary mb-3">📅 期間で絞り込み</a>
+
+<a href="{% url 'expense_chart_bar' %}" class="btn btn-warning mb-3">📊 カテゴリ別棒グラフ</a>
+
+<h2 class="mb-4">支出一覧</h2>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>日付</th>
+            <th>カテゴリ</th>
+            <th>金額</th>
+            <th>メモ</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in expenses %}
+        <tr>
+            <td>{{ e.date }}</td>
+            <td>{{ e.category }}</td>
+            <td>{{ e.amount }}円</td>
+            <td>{{ e.memo }}</td>
+            <td>
+                <a href="{% url 'expense_edit' e.id %}" class="btn btn-sm btn-primary">
+        編集
+                </a>
+                <a href="{% url 'expense_delete' e.id %}"
+                   class="btn btn-sm btn-danger"
+                   onclick="return confirm('本当に削除しますか？');">
+        削除
+                </a>
+            </td>  <!-- ← ここが「編集」ボタン -->            
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

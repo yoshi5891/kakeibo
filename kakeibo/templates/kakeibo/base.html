@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}家計簿{% endblock %}</title>
+
+    <style>
+        .month-nav {
+            margin-bottom: 20px;
+        }
+    </style>
+
+    <link rel="stylesheet" href="...">
+    
+    <!-- Bootstrap（見た目を整えるため） -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'dashboard' %}">家計簿アプリ</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+
+        <li class="nav-item">
+          <a class="nav-link 
+              {% if request.resolver_match.url_name == 'dashboard' %}
+                  active
+              {% endif %}
+          " href="{% url 'dashboard' %}">
+            ダッシュボード
+          </a>
+
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link 
+              {% if request.resolver_match.url_name == 'expense_list' %}
+                  active
+              {% endif %}
+          " href="{% url 'expense_list' %}">
+            支出一覧
+          </a>
+
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link 
+              {% if request.resolver_match.url_name == 'expense_create' %}
+                  active
+              {% endif %}
+          " href="{% url 'expense_create' %}">
+            支出を追加
+        </a>
+
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link 
+              {% if request.resolver_match.url_name == 'expense_summary' %}
+                  active
+              {% endif %}
+          " href="{% url 'expense_summary' %}">
+            月別サマリー
+          </a>
+
+        </li>
+
+      </ul>
+      <!-- ⭐ ここにログイン状態を追加（右寄せ） -->
+      <div class="ms-auto text-white">
+          {% if user.is_authenticated %}
+              こんにちは、{{ user.username }} さん　
+              <a class="text-warning" href="{% url 'logout' %}">ログアウト</a>
+          {% else %}
+              <a class="text-warning" href="{% url 'login' %}">ログイン</a>
+          {% endif %}
+    </div>
+  </div>
+</nav>
+
+    <div class="container mt-4">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+
+</html>
+
+{% if user.is_authenticated %}
+    <p>こんにちは、{{ user.username }} さん</p>
+    <a href="{% url 'logout' %}">ログアウト</a>
+{% else %}
+    <a href="{% url 'login' %}">ログイン</a>
+{% endif %}

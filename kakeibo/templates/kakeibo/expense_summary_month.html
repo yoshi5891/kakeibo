@@ -1,0 +1,18 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block title %}{{ year }}年{{ month }}月の集計{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">{{ year }}年{{ month }}月の支出合計</h2>
+
+<div class="alert alert-info">
+    <h3>{{ total }} 円</h3>
+</div>
+
+<div class="mb-3">
+    <a href="{% url 'expense_summary_month' prev_year prev_month %}" class="btn btn-outline-primary">← 前月</a>
+    <a href="{% url 'expense_summary_month' next_year next_month %}" class="btn btn-outline-primary">翌月 →</a>
+</div>
+
+<a href="{% url 'expense_list' %}" class="btn btn-secondary">一覧に戻る</a>
+{% endblock %}

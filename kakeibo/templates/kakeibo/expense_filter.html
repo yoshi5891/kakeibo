@@ -1,0 +1,48 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block title %}期間フィルタ{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">期間で絞り込み</h2>
+
+<form method="POST" class="mb-4">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col">
+            <label>開始日</label>
+            <input type="date" name="start_date" class="form-control" required>
+        </div>
+        <div class="col">
+            <label>終了日</label>
+            <input type="date" name="end_date" class="form-control" required>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">検索</button>
+</form>
+
+{% if expenses %}
+<h3>検索結果</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>日付</th>
+            <th>カテゴリ</th>
+            <th>金額</th>
+            <th>メモ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in expenses %}
+        <tr>
+            <td>{{ e.date }}</td>
+            <td>{{ e.category }}</td>
+            <td>{{ e.amount }}円</td>
+            <td>{{ e.memo }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<a href="{% url 'expense_list' %}" class="btn btn-secondary mt-3">一覧に戻る</a>
+{% endblock %}

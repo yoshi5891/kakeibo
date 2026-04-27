@@ -1,0 +1,28 @@
+{% extends 'kakeibo/base.html' %}
+
+<div class="card mb-4">
+    <div class="card-body">
+
+        <h2 class="mb-4">
+            {% if category %}
+                カテゴリを編集
+            {% else %}
+                カテゴリを追加
+            {% endif %}
+        </h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="name" class="form-label">カテゴリ名</label>
+                <input type="text" name="name" id="name" class="form-control" required value="{{ category.name|default:'' }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">保存</button>
+            <a href="{% url 'category_list' %}" class="btn btn-secondary mt-3">戻る</a>
+
+        </form>
+
+    </div>
+</div>

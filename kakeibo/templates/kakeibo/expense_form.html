@@ -1,0 +1,77 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block title %}
+    {% if expense %}支出を編集{% else %}支出を追加{% endif %}
+{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">
+    {% if expense %}支出を編集{% else %}支出を追加{% endif %}
+</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <!-- 日付 -->
+    <div class="mb-3">
+        <label class="form-label">日付</label>
+        <input
+            type="date"
+            name="date"
+            class="form-control"
+            required
+            value="{{ initial.date|default:'' }}"
+        >
+    </div>
+
+    <!-- カテゴリ -->
+    <div class="mb-3">
+        <label class="form-label">カテゴリ</label>
+
+        {% if categories %}
+            <select name="category" class="form-select" required>
+                {% for category in categories %}
+                    <option value="{{ category.id }}"
+                        {% if initial.category|default:0 == category.id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        {% else %}
+            <div class="alert alert-warning">
+                カテゴリがありません。<br>
+                <a href="{% url 'category_add' %}" class="btn btn-sm btn-success mt-2">
+                    カテゴリを追加する
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 金額 -->
+    <div class="mb-3">
+        <label class="form-label">金額</label>
+        <input type="number" name="amount" class="form-control" value="{{ initial.amount }}">
+    </div>
+
+    <!-- メモ（折りたたみ式） -->
+    <div class="mb-3">
+        <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#memoArea">
+            メモを入力（任意）
+        </button>
+
+        <div class="collapse mt-2" id="memoArea">
+            <textarea name="memo" class="form-control" rows="3">
+                {% if expense %}{{ expense.memo }}{% endif %}
+            </textarea>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        {% if expense %}更新{% else %}登録{% endif %}
+    </button>
+</form>
+
+{% endblock %}

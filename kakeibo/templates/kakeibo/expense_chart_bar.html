@@ -1,0 +1,38 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block title %}カテゴリ別棒グラフ{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">カテゴリ別支出（棒グラフ）</h2>
+
+<canvas id="barChart" width="400" height="300"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('barChart');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: '支出金額',
+                data: {{ totals|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+<a href="{% url 'expense_list' %}" class="btn btn-secondary mt-3">一覧に戻る</a>
+{% endblock %}

@@ -1,0 +1,20 @@
+<form method="post" action="/upload/" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">アップロード</button>
+
+    <label>OCR モード</label>
+    <select name="mode">
+        <option value="normal">標準</option>
+        <option value="receipt">レシート（薄い印字）</option>
+        <option value="smaregi">スマレジ（白飛び）</option>
+    </select>
+</form>
+
+{% if text %}
+<pre>{{ text }}</pre>
+{% endif %}
+
+{% if total %}
+<p><strong>合計金額：</strong> {{ total }} 円</p>
+{% endif %}

@@ -1,0 +1,226 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block title %}ダッシュボード{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">ダッシュボード</h2>
+
+<div class="d-flex justify-content-between align-items-center my-3">
+    <a href="?month={{ prev_month }}" class="btn btn-outline-secondary">
+        ← 前月
+    </a>
+
+    <span class="fw-bold" style="font-size: 1.2rem;">
+        {{ month }}
+    </span>
+
+    <a href="?month={{ next_month }}" class="btn btn-outline-secondary">
+        翌月 →
+    </a>
+</div>
+
+<div class="alert alert-secondary text-center">
+    先月：{{ prev_month_total }} 円　
+    今月との差：<span style="color: {{ diff_color }};">{{ diff }} 円</span>
+
+</div>
+
+<!-- 今日の支出 & 今月の合計カード -->
+<div class="row mb-4">
+
+    <!-- 今月の合計 -->
+    <div class="col-md-6">
+        <div class="card shadow-sm p-3">
+            <h5 class="card-title">今月の合計</h5>
+            <p class="display-6">{{ total }} 円</p>
+        </div>
+    </div>
+
+    <!-- 今日の支出 -->
+    <div class="col-md-6">
+        <div class="card shadow-sm p-3">
+            <h5 class="card-title">今日の支出</h5>
+            <p class="display-6">{{ today_total }} 円</p>
+        </div>
+    </div>
+
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h4>{{ month }} の支出合計</h4>
+        <h2>{{ total }} 円</h2>
+    </div>
+</div>
+
+<!-- ここから追加：円グラフカード -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="mb-3 text-center">カテゴリ別支出（円グラフ）</h4>
+        <canvas id="pieChart"></canvas>
+    </div>
+</div>
+<!-- ここまで追加 -->
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="mb-3 text-center">日別支出推移</h4>
+        <canvas id="dailyChart"></canvas>
+    </div>
+</div>
+
+<!-- ここに棒グラフカードを追加 -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="mb-3 text-center">カテゴリ別支出（棒グラフ）</h4>
+        <canvas id="barChart"></canvas>
+    </div>
+</div>
+<!-- ここまで -->
+
+<!-- 最近の支出一覧 -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="mb-3">最近の支出</h4>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>日付</th>
+                    <th>カテゴリ</th>
+                    <th>金額</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in recent_expenses %}
+                <tr>
+                    <td>{{ expense.date|date:"Y年m月d日" }}</td>
+                    <td>{{ expense.category.name }}</td>
+                    <td>{{ expense.amount }} 円</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<a href="{% url 'expense_list' %}" class="btn btn-primary mt-3">支出一覧へ</a>
+
+<!-- ここから追加：Chart.js 読み込み＆円グラフ描画 -->
+ <!-- Chart.js 読み込み -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- 円グラフ script -->
+<script>
+    const ctxPie = document.getElementById('pieChart');
+
+    new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                data: {{ totals|safe }},
+                backgroundColor: {{ colors|safe }},
+            }]
+        }
+    });
+</script>
+<!-- ここまで追加 -->
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="card-title text-center mb-3">カテゴリ別ランキング（今月）</h4>
+
+        <ol class="list-group list-group-numbered">
+            {% for item in ranking %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">{{ item.category__name }}</span>
+                    <span class="text-end">{{ item.total }} 円</span>
+                </li>
+            {% empty %}
+                <li class="list-group-item">データがありません</li>
+            {% endfor %}
+        </ol>
+    </div>
+</div>
+
+<!-- 折れ線グラフ追加 -->
+<script>
+    var ctx2 = document.getElementById('dailyChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: {{ date_labels|safe }},
+            datasets: [{
+                label: '日別支出額',
+                data: {{ daily_totals|safe }},
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.15)',
+                borderWidth: 3,
+                pointRadius: 4,
+                pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                pointBorderColor: '#fff',
+                pointHoverRadius: 6,
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y + ' 円';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '円';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+<!-- 棒グラフ script をここに追加 -->
+<script>
+    const ctxBar = document.getElementById('barChart');
+
+    new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: '支出金額',
+                data: {{ totals|safe }},
+                backgroundColor: {{ colors|safe }},
+                borderColor: {{ colors|safe }},
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+<!-- ここまで -->
+
+<div class="alert alert-info text-center mt-3">
+    今日の支出：{{ today_total }} 円
+</div>
+
+{% endblock %}
