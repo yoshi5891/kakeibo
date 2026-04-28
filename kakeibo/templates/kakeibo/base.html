@@ -17,68 +17,56 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'dashboard' %}">家計簿アプリ</a>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'dashboard' %}">家計簿アプリ</a>
 
-    <!-- ハンバーガーメニュー -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+      <!-- ハンバーガーメニュー -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <!-- 折りたたみ領域 -->
-    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- 折りたたみ領域 -->
+      <div class="collapse navbar-collapse" id="navbarNav">
 
-      <!-- 左側メニュー -->
-      <ul class="navbar-nav me-auto">
+        <!-- 左側メニュー -->
+        <ul class="navbar-nav me-auto">
 
-        <li class="nav-item">
-          <a class="nav-link 
-              {% if request.resolver_match.url_name == 'dashboard' %}
-                  active
-              {% endif %}
-          " href="{% url 'dashboard' %}">
-            ダッシュボード
-          </a>
-        </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+              href="{% url 'dashboard' %}">
+              ダッシュボード
+            </a>
+          </li>
 
-        <li class="nav-item">
-          <a class="nav-link 
-              {% if request.resolver_match.url_name == 'expense_list' %}
-                  active
-              {% endif %}
-          " href="{% url 'expense_list' %}">
-            支出一覧
-          </a>
-        </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'expense_list' %}active{% endif %}"
+              href="{% url 'expense_list' %}">
+              支出一覧
+            </a>
+          </li>
 
-        <li class="nav-item">
-          <a class="nav-link 
-              {% if request.resolver_match.url_name == 'expense_create' %}
-                  active
-              {% endif %}
-          " href="{% url 'expense_create' %}">
-            支出を追加
-          </a>
-        </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'expense_create' %}active{% endif %}"
+              href="{% url 'expense_create' %}">
+              支出を追加
+            </a>
+          </li>
 
-        <li class="nav-item">
-          <a class="nav-link 
-              {% if request.resolver_match.url_name == 'expense_summary' %}
-                  active
-              {% endif %}
-          " href="{% url 'expense_summary' %}">
-            月別サマリー
-          </a>
-        </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'expense_summary' %}active{% endif %}"
+              href="{% url 'expense_summary' %}">
+              月別サマリー
+            </a>
+          </li>
 
-      </ul>
+        </ul>
 
-      <!-- 右側メニュー（ログイン情報） -->
-      <ul class="navbar-nav ms-md-0 ms-auto flex-column flex-md-row text-end">
+        <!-- 右側メニュー（折りたたみ内に統合） -->
+        <ul class="navbar-nav">
           {% if user.is_authenticated %}
             <li class="nav-item">
-              <span class="navbar-text">こんにちは、{{ user.username }} さん</span>
+              <span class="nav-link disabled">こんにちは、{{ user.username }} さん</span>
             </li>
             <li class="nav-item">
               <a class="nav-link text-warning" href="{% url 'logout' %}">ログアウト</a>
@@ -88,12 +76,11 @@
               <a class="nav-link text-warning" href="{% url 'login' %}">ログイン</a>
             </li>
           {% endif %}
-      </ul>
+        </ul>
+
+      </div>
     </div>
-  </div>
-</nav>
-
-
+  </nav>
     <div class="container mt-4">
         {% block content %}
         {% endblock %}
