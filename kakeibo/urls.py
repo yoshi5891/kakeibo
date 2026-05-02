@@ -30,4 +30,6 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='/login/'), name='logout'),
     #OCR追加
     path('upload/', views.upload_image, name='upload_image'),
+    #Help追加
+    path("help/", views.help_page, name="help"),
 ]

@@ -499,4 +499,7 @@ def guess_category(text):
                 return category
     return None
 
+def help_page(request):
+    return render(request, "help.html")
+
 
