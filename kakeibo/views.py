@@ -500,6 +500,6 @@ def guess_category(text):
     return None
 
 def help_page(request):
-    return render(request, "help.html")
+    return render(request, "kakeibo/help.html")
 
 
