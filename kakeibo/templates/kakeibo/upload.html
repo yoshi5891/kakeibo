@@ -1,14 +1,20 @@
 <form method="post" action="/upload/" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">アップロード</button>
+    <!-- iPhone カメラ対応の file input -->
+    <p>
+        <label for="id_image">画像を選択（iPhoneはカメラ起動可）</label><br>
+        <input type="file" name="image" accept="image/*" capture="camera" required>
+    </p>
 
     <label>OCR モード</label>
     <select name="mode">
         <option value="normal">標準</option>
         <option value="receipt">レシート（薄い印字）</option>
         <option value="smaregi">スマレジ（白飛び）</option>
+        <option value="iphone">iPhone写真用（推奨）</option> <!-- ← 追加 -->
     </select>
+
+    <button type="submit">アップロード</button>
 </form>
 
 {% if text %}

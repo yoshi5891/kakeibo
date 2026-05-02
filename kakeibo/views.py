@@ -455,7 +455,24 @@ def upload_image(request):
                     cv2.THRESH_BINARY,
                     31, 2
                 )
-            
+
+            elif mode == "iphone":
+                # --- iPhone写真向け前処理 ---
+                img_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
+                # コントラスト強化
+                gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
+                clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+                gray = clahe.apply(gray)
+
+                # 二値化（スマホ写真向け）
+                thresh = cv2.adaptiveThreshold(
+                    gray, 255,
+                    cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                    cv2.THRESH_BINARY,
+                    31, 2
+                )
+                            
             # OCR
 
             from PIL import Image as PilImage
