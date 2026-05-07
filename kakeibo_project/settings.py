@@ -77,7 +77,9 @@ WSGI_APPLICATION = "kakeibo_project.wsgi.application"
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+        default='postgresql://kakeibo_db_0gle_user:kBO3HHEAwLUQ0BvRnLRcOZQ9QPNK87Vm@dpg-d7nnf4pkh4rs73baegf0-a.singapore-postgres.render.com/kakeibo_db_0gle',
+        conn_max_age=600,
+        ssl_require=True
     )
 }
 
