@@ -27,7 +27,7 @@ urlpatterns = [
     path('categories/<int:pk>/delete/', views.category_delete, name='category_delete'),
     #ログイン画面
     path('login/', auth_views.LoginView.as_view(template_name='kakeibo/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', views.logout_view, name='logout'),
     #OCR追加
     path('upload/', views.upload_image, name='upload_image'),
     #Help追加

@@ -519,4 +519,9 @@ def guess_category(text):
 def help_page(request):
     return render(request, "kakeibo/help.html")
 
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
+def logout_view(request):
+    logout(request)
+    return redirect('login')
