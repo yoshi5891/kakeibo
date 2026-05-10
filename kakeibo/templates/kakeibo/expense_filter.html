@@ -36,7 +36,7 @@
         <tr>
             <td>{{ e.date }}</td>
             <td>{{ e.category }}</td>
-            <td>{{ e.amount }}円</td>
+            <td>{{ e.amount|intcomma }}円</td>
             <td>{{ e.memo }}</td>
         </tr>
         {% endfor %}
