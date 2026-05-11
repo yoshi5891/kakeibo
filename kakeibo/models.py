@@ -19,3 +19,12 @@ class Expense(models.Model):
 
     def __str__(self):
         return f"{self.date} - {self.amount}円"
+    
+    class FixedCost(models.Model):
+    name = models.CharField(max_length=100)
+    amount = models.IntegerField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.amount}円)"
