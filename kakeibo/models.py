@@ -21,10 +21,11 @@ class Expense(models.Model):
         return f"{self.date} - {self.amount}円"
     
 class FixedCost(models.Model):
-    name = models.CharField(max_length=100)
-    amount = models.IntegerField()
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    name = models.CharField("固定費名", max_length=100)
+    amount = models.IntegerField("金額")
+    category = models.ForeignKey(Category, verbose_name="カテゴリ", on_delete=models.CASCADE)
+    created_at = models.DateTimeField("登録日", auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.name} ({self.amount}円)"
+    class Meta:
+        verbose_name = "固定費"
+        verbose_name_plural = "固定費一覧"
