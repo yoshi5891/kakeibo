@@ -14,7 +14,7 @@ class ExpenseAdmin(admin.ModelAdmin):
 
 @admin.register(FixedCost)
 class FixedCostAdmin(admin.ModelAdmin):
-    list_display = ('name', 'amount', 'category', 'created_at')
+    list_display = ('name', 'amount', 'category')
     list_filter = ('category',)
     search_fields = ('name',)
 
