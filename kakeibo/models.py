@@ -38,7 +38,7 @@ class Expense(models.Model):
 
 # --- 固定費 ---
 class FixedCost(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Family, on_delete=models.CASCADE)
     name = models.CharField("固定費名", max_length=100)
     amount = models.IntegerField("金額")
     category = models.ForeignKey(Category, verbose_name="カテゴリ", on_delete=models.CASCADE)
