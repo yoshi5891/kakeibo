@@ -28,6 +28,9 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
+# ローカル開発時（環境変数が空の場合）は 127.0.0.1 を許可
+if ALLOWED_HOSTS == [''] or ALLOWED_HOSTS == []:
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 

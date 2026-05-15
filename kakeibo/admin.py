@@ -1,10 +1,22 @@
 from django.contrib import admin
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
 from .models import Profile, Family, Category, Expense, FixedCost
 
-@admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
-    pass
+# --- Profile を User の下に表示するための Inline ---
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
 
+# --- UserAdmin を拡張して Profile を紐づける ---
+class CustomUserAdmin(UserAdmin):
+    inlines = [ProfileInline]
+
+# 既存の UserAdmin を置き換える
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
+
+# --- 以下はあなたが作った Admin 設定 ---
 @admin.register(Family)
 class FamilyAdmin(admin.ModelAdmin):
     pass
