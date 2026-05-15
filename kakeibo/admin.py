@@ -1,5 +1,10 @@
 from django.contrib import admin
 from .models import Category, Expense, FixedCost
+from .models import Profile
+
+admin.site.register(Profile)
+admin.site.register(Category)
+admin.site.register(Expense)
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
