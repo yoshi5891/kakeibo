@@ -87,7 +87,7 @@ def expense_create(request):
 
 @login_required
 def expense_list(request):
-    expenses = Expense.objects.filter(user=request.user).order_by('-date')
+    expenses = Expense.objects.all()
     return render(request, 'kakeibo/expense_list.html', {'expenses': expenses})
 
 @login_required

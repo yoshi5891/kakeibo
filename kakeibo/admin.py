@@ -8,7 +8,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Expense)
 class ExpenseAdmin(admin.ModelAdmin):
-    list_display = ('date', 'amount', 'category', 'user')
+    list_display = ('date', 'amount', 'category')
     list_filter = ('category', 'date')
     search_fields = ('memo',)
 
