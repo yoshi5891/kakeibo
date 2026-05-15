@@ -16,6 +16,7 @@ from PIL import Image
 import re
 import cv2
 import numpy as np
+from django.contrib.auth.decorators import login_required
 
 # --- カテゴリごとの固定色設定 ---
 CATEGORY_COLORS = {
@@ -35,15 +36,17 @@ CATEGORY_KEYWORDS = {
 
 @login_required
 def expense_create(request):
-    # URLパラメータから値を取得（OCR から渡ってくる）
+    family = request.user.profile.family
+
     amount = request.GET.get('amount')
     date_param = request.GET.get('date')
 
     if request.method == 'POST':
         category_id = request.POST.get('category')
-        category = Category.objects.get(id=category_id)
+        category = Category.objects.get(id=category_id, family=family)
 
         Expense.objects.create(
+            family=family,
             category=category,
             date=request.POST.get('date'),
             amount=request.POST.get('amount'),
@@ -51,34 +54,24 @@ def expense_create(request):
         )
         return redirect('expense_list')
 
-    # 初期値をセット
     initial = {}
-
-    # 金額（OCR）
     if amount:
         initial['amount'] = amount
 
-    # 日付（OCR → なければ今日）
-    if date_param:
-        initial['date'] = date_param
-    else:
-        initial['date'] = date.today().strftime('%Y-%m-%d')
+    initial['date'] = date_param if date_param else date.today().strftime('%Y-%m-%d')
 
-    # カテゴリ（OCR）
     category_param = request.GET.get('category')
     if category_param:
         initial['category'] = int(category_param)
 
-    categories = Category.objects.all()
+    categories = Category.objects.filter(family=family)
 
-    # カテゴリごとに「最後に使った日」を付与
     for c in categories:
         last_expense = Expense.objects.filter(category=c).order_by('-date').first()
         c.last_used = last_expense.date if last_expense else date.min
 
-    # 最後に使った順に並べる
     categories = sorted(categories, key=lambda c: c.last_used, reverse=True)
-    
+
     return render(request, 'kakeibo/expense_form.html', {
         'categories': categories,
         'initial': initial,
@@ -86,16 +79,20 @@ def expense_create(request):
 
 @login_required
 def expense_list(request):
-    expenses = Expense.objects.all()
-    return render(request, 'kakeibo/expense_list.html', {'expenses': expenses})
+    family = request.user.profile.family
+    expenses = Expense.objects.filter(family=family).order_by('-date')
+    return render(request, 'kakeibo/expense_list.html', {
+        'expenses': expenses,
+    })
 
 @login_required
 def expense_edit(request, pk):
-    expense = get_object_or_404(Expense, pk=pk)
+    family = request.user.profile.family
+    expense = get_object_or_404(Expense, pk=pk, family=family)
 
     if request.method == 'POST':
         category_id = request.POST.get('category')
-        category = Category.objects.get(id=category_id)
+        category = Category.objects.get(id=category_id, family=family)
 
         expense.date = request.POST.get('date')
         expense.category = category
@@ -105,7 +102,8 @@ def expense_edit(request, pk):
 
         return redirect('expense_list')
 
-    categories = Category.objects.all()
+    categories = Category.objects.filter(family=family)
+
     return render(request, 'kakeibo/expense_form.html', {
         'expense': expense,
         'categories': categories
@@ -113,16 +111,20 @@ def expense_edit(request, pk):
 
 @login_required
 def expense_delete(request, pk):
-    expense = get_object_or_404(Expense, pk=pk)
+    family = request.user.profile.family
+    expense = get_object_or_404(Expense, pk=pk, family=family)
     expense.delete()
     return redirect('expense_list')
 
 @login_required
 def expense_summary(request):
+    family = request.user.profile.family
+
     today = timezone.now()
     month_start = today.replace(day=1)
 
     total = Expense.objects.filter(
+        family=family,
         date__gte=month_start,
         date__lte=today
     ).aggregate(Sum('amount'))['amount__sum'] or 0
@@ -134,12 +136,12 @@ def expense_summary(request):
 
 @login_required
 def expense_chart(request):
-    # カテゴリ別の合計金額を集計
-    data = Expense.objects.values('category__name').annotate(total=Sum('amount'))
+    family = request.user.profile.family
+
+    data = Expense.objects.filter(family=family).values('category__name').annotate(total=Sum('amount'))
 
     labels = [item['category__name'] for item in data]
     totals = [item['total'] for item in data]
-    colors = [CATEGORY_COLORS.get(item['category__name'], "#CCCCCC") for item in data]
 
     return render(request, 'kakeibo/expense_chart.html', {
         'labels': labels,
@@ -148,22 +150,22 @@ def expense_chart(request):
 
 @login_required
 def expense_summary_month(request, year, month):
-    # 月初と月末を計算
+    family = request.user.profile.family
+
     month_start = date(year, month, 1)
     last_day = monthrange(year, month)[1]
     month_end = date(year, month, last_day)
 
-    # 合計金額
     total = Expense.objects.filter(
+        family=family,
         date__gte=month_start,
         date__lte=month_end
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # 前月・翌月の計算
     prev_year = year if month > 1 else year - 1
     prev_month = month - 1 if month > 1 else 12
 
-    next_year = year if month < 12 else year - 1
+    next_year = year if month < 12 else year + 1
     next_month = month + 1 if month < 12 else 1
 
     return render(request, 'kakeibo/expense_summary_month.html', {
@@ -178,6 +180,7 @@ def expense_summary_month(request, year, month):
 
 @login_required
 def expense_filter(request):
+    family = request.user.profile.family
     expenses = None
 
     if request.method == 'POST':
@@ -186,6 +189,7 @@ def expense_filter(request):
 
         if start and end:
             expenses = Expense.objects.filter(
+                family=family,
                 date__gte=start,
                 date__lte=end
             ).order_by('date')
@@ -197,7 +201,9 @@ def expense_filter(request):
 #カテゴリ別の合計を取得
 @login_required
 def expense_chart_bar(request):
-    data = Expense.objects.values('category__name').annotate(total=Sum('amount'))
+    family = request.user.profile.family
+
+    data = Expense.objects.filter(family=family).values('category__name').annotate(total=Sum('amount'))
 
     labels = [item['category__name'] for item in data]
     totals = [item['total'] for item in data]
@@ -209,7 +215,8 @@ def expense_chart_bar(request):
 
 @login_required
 def dashboard(request):
-    # --- 月パラメータの取得 ---
+    family = request.user.profile.family
+
     month_str = request.GET.get('month')
 
     if month_str:
@@ -218,78 +225,54 @@ def dashboard(request):
     else:
         target_date = date.today().replace(day=1)
 
-    # 月初と月末
     start_date = target_date
     end_date = (target_date + relativedelta(months=1)) - timedelta(days=1)
 
-    # ⭐ 対象月の支出だけを取得（ここで expenses を定義）
     expenses = Expense.objects.filter(
+        family=family,
         date__range=(start_date, end_date)
     )
 
-    # 月の日数を取得
     days_in_month = (end_date - start_date).days + 1
-
-    # 日付リスト（1日〜末日）
     date_labels = [(start_date + timedelta(days=i)).day for i in range(days_in_month)]
-
-    # 日別の合計金額を初期化（全部0円）
     daily_totals = [0] * days_in_month
 
-    # 実際の支出を日別に集計
     for expense in expenses:
         day_index = expense.date.day - 1
         daily_totals[day_index] += expense.amount
 
-
-    # --- 前月・翌月の計算 ---
     prev_month_date = target_date - relativedelta(months=1)
     next_month_date = target_date + relativedelta(months=1)
 
     prev_month_str = prev_month_date.strftime('%Y-%m')
     next_month_str = next_month_date.strftime('%Y-%m')
 
-    # ⭐ 合計金額
     total = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # --- 前月の支出合計を計算 ---
-    prev_month_date = target_date - relativedelta(months=1)
     prev_year = prev_month_date.year
     prev_month_num = prev_month_date.month
 
     prev_month_total = Expense.objects.filter(
+        family=family,
         date__year=prev_year,
         date__month=prev_month_num
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # 今月との差分
     diff = total - prev_month_total
-
-    # 増減の色（プラスなら赤、マイナスなら青）
     diff_color = "red" if diff > 0 else "blue"
 
-
-
-    # ⭐ 円グラフ・棒グラフ用データ
     data = expenses.values('category__name').annotate(total=Sum('amount'))
     labels = [item['category__name'] for item in data]
     totals = [item['total'] for item in data]
-
-    # --- カテゴリ別ランキング（トップ3） ---
-    ranking = data.order_by('-total')[:3]
-
-    # ⭐ カテゴリごとの色リストを作成
     colors = [CATEGORY_COLORS.get(item['category__name'], "#CCCCCC") for item in data]
 
-
-    # ⭐ 最近の支出5件
+    ranking = data.order_by('-total')[:3]
     recent_expenses = expenses.order_by('-date')[:5]
 
-    # 表示用の月（例：2026年03月）
     display_month = target_date.strftime('%Y年%m月')
 
-    #「今日の支出合計」を追加
     today_total = Expense.objects.filter(
+        family=family,
         date=date.today()
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
@@ -309,25 +292,28 @@ def dashboard(request):
         'prev_month_total': prev_month_total,
         'diff': diff,
         'diff_color': diff_color,
-
-
     })
 
 @login_required
 def category_list(request):
-    categories = Category.objects.all()
+    family = request.user.profile.family
+    categories = Category.objects.filter(family=family)
+
     for c in categories:
         c.count = Expense.objects.filter(category=c).count()
-        c.color = CATEGORY_COLORS.get(c.name, "#CCCCCC") 
+        c.color = CATEGORY_COLORS.get(c.name, "#CCCCCC")
 
     return render(request, 'kakeibo/category_list.html', {'categories': categories})
 
 #カテゴリ追加機能実装
 @login_required
 def category_add(request):
+    family = request.user.profile.family
+
     if request.method == 'POST':
         name = request.POST.get('name')
         Category.objects.create(
+            family=family,
             name=name,
         )
         return redirect('category_list')
@@ -337,7 +323,8 @@ def category_add(request):
 #カテゴリ編集機能実装
 @login_required
 def category_edit(request, pk):
-    category = get_object_or_404(Category, pk=pk)
+    family = request.user.profile.family
+    category = get_object_or_404(Category, pk=pk, family=family)
 
     if request.method == 'POST':
         category.name = request.POST.get('name')
@@ -349,7 +336,8 @@ def category_edit(request, pk):
 #カテゴリ削除機能実装
 @login_required
 def category_delete(request, pk):
-    category = get_object_or_404(Category, pk=pk)
+    family = request.user.profile.family
+    category = get_object_or_404(Category, pk=pk, family=family)
     category.delete()
     return redirect('category_list')
 
