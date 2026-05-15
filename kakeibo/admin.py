@@ -3,7 +3,7 @@ from .models import Category, Expense, FixedCost
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name')  # 一覧に表示する項目
+    list_display = ('name',)  # 一覧に表示する項目
     search_fields = ('name',)        # 名前で検索
 
 @admin.register(Expense)
@@ -14,7 +14,7 @@ class ExpenseAdmin(admin.ModelAdmin):
 
 @admin.register(FixedCost)
 class FixedCostAdmin(admin.ModelAdmin):
-    list_display = ('name', 'amount', 'category')
+    list_display = ('name', 'amount', 'category', 'created_at')
     list_filter = ('category',)
     search_fields = ('name',)
 
