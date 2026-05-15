@@ -317,7 +317,7 @@ def dashboard(request):
 def category_list(request):
     categories = Category.objects.all()
     for c in categories:
-        c.count = Expense.objects.all()
+        c.count = Expense.objects.filter(category=c).count()
         c.color = CATEGORY_COLORS.get(c.name, "#CCCCCC") 
 
     return render(request, 'kakeibo/category_list.html', {'categories': categories})
