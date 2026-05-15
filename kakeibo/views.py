@@ -44,7 +44,6 @@ def expense_create(request):
         category = Category.objects.get(id=category_id)
 
         Expense.objects.create(
-            user=request.user,
             category=category,
             date=request.POST.get('date'),
             amount=request.POST.get('amount'),
@@ -70,11 +69,11 @@ def expense_create(request):
     if category_param:
         initial['category'] = int(category_param)
 
-    categories = Category.objects.filter(user=request.user)
+    categories = Category.objects.all()
 
     # カテゴリごとに「最後に使った日」を付与
     for c in categories:
-        last_expense = Expense.objects.filter(user=request.user, category=c).order_by('-date').first()
+        last_expense = Expense.objects.all()
         c.last_used = last_expense.date if last_expense else date.min
 
     # 最後に使った順に並べる
@@ -106,7 +105,7 @@ def expense_edit(request, pk):
 
         return redirect('expense_list')
 
-    categories = Category.objects.filter(user=request.user).order_by('name')
+    categories = Category.objects.all()
     return render(request, 'kakeibo/expense_form.html', {
         'expense': expense,
         'categories': categories
@@ -124,7 +123,6 @@ def expense_summary(request):
     month_start = today.replace(day=1)
 
     total = Expense.objects.filter(
-        user=request.user,
         date__gte=month_start,
         date__lte=today
     ).aggregate(Sum('amount'))['amount__sum'] or 0
@@ -157,7 +155,6 @@ def expense_summary_month(request, year, month):
 
     # 合計金額
     total = Expense.objects.filter(
-        user=request.user,
         date__gte=month_start,
         date__lte=month_end
     ).aggregate(Sum('amount'))['amount__sum'] or 0
@@ -227,7 +224,6 @@ def dashboard(request):
 
     # ⭐ 対象月の支出だけを取得（ここで expenses を定義）
     expenses = Expense.objects.filter(
-        user=request.user,
         date__range=(start_date, end_date)
     )
 
@@ -262,7 +258,6 @@ def dashboard(request):
     prev_month_num = prev_month_date.month
 
     prev_month_total = Expense.objects.filter(
-        user=request.user,
         date__year=prev_year,
         date__month=prev_month_num
     ).aggregate(Sum('amount'))['amount__sum'] or 0
@@ -295,7 +290,6 @@ def dashboard(request):
 
     #「今日の支出合計」を追加
     today_total = Expense.objects.filter(
-        user=request.user,
         date=date.today()
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
@@ -321,9 +315,9 @@ def dashboard(request):
 
 @login_required
 def category_list(request):
-    categories = Category.objects.filter(user=request.user).order_by('name')
+    categories = Category.objects.all()
     for c in categories:
-        c.count = Expense.objects.filter(user=request.user, category=c).count()
+        c.count = Expense.objects.all()
         c.color = CATEGORY_COLORS.get(c.name, "#CCCCCC") 
 
     return render(request, 'kakeibo/category_list.html', {'categories': categories})
@@ -335,7 +329,6 @@ def category_add(request):
         name = request.POST.get('name')
         Category.objects.create(
             name=name,
-            user=request.user  # ← これを追加
         )
         return redirect('category_list')
 
@@ -344,7 +337,7 @@ def category_add(request):
 #カテゴリ編集機能実装
 @login_required
 def category_edit(request, pk):
-    category = get_object_or_404(Category, pk=pk, user=request.user)
+    category = get_object_or_404(Category, pk=pk)
 
     if request.method == 'POST':
         category.name = request.POST.get('name')
@@ -356,7 +349,7 @@ def category_edit(request, pk):
 #カテゴリ削除機能実装
 @login_required
 def category_delete(request, pk):
-    category = get_object_or_404(Category, pk=pk, user=request.user)
+    category = get_object_or_404(Category, pk=pk)
     category.delete()
     return redirect('category_list')
 
