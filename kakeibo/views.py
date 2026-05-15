@@ -73,7 +73,7 @@ def expense_create(request):
 
     # カテゴリごとに「最後に使った日」を付与
     for c in categories:
-        last_expense = Expense.objects.all()
+        last_expense = Expense.objects.filter(category=c).order_by('-date').first()
         c.last_used = last_expense.date if last_expense else date.min
 
     # 最後に使った順に並べる
