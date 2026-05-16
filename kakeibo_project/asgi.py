@@ -11,6 +11,14 @@ import os
 
 from django.core.asgi import get_asgi_application
 
+# --- 追加ここから ---
+from django.core.management import call_command
+try:
+    call_command('migrate')
+except Exception as e:
+    print("Migration error:", e)
+# --- 追加ここまで ---
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "kakeibo_project.settings")
 
 application = get_asgi_application()

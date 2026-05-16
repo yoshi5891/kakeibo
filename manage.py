@@ -7,6 +7,15 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "kakeibo_project.settings")
+    
+     # --- 追加ここから ---
+    try:
+        from django.core.management import call_command
+        call_command('migrate')
+    except Exception as e:
+        print("Migration error:", e)
+    # --- 追加ここまで ---
+    
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
