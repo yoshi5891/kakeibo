@@ -46,7 +46,6 @@ def expense_create(request):
         category = Category.objects.get(id=category_id)
 
         Expense.objects.create(
-            family=family,
             category=category,
             date=request.POST.get('date'),
             amount=request.POST.get('amount'),
@@ -310,7 +309,6 @@ def category_add(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         Category.objects.create(
-            family=family,
             name=name,
         )
         return redirect('category_list')
