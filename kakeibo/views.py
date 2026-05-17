@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-from networkx import non_edges
 from .models import Expense, Category
 from .forms import UploadImageForm
 from django.utils import timezone
