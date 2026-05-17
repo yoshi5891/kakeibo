@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from networkx import non_edges
 from .models import Expense, Category
 from .forms import UploadImageForm
 from django.utils import timezone
@@ -215,8 +216,9 @@ def expense_chart_bar(request):
 
 @login_required
 def dashboard(request):
-    family = request.user.profile.family
-
+    # family = request.user.profile.family
+    family = None
+    
     month_str = request.GET.get('month')
 
     if month_str:
