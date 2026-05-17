@@ -18,7 +18,7 @@ class Profile(models.Model):
 
 # --- カテゴリ ---
 class Category(models.Model):
-    family = models.ForeignKey(Family, on_delete=models.CASCADE)
+    # family = models.ForeignKey(Family, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -26,7 +26,7 @@ class Category(models.Model):
 
 # --- 支出 ---
 class Expense(models.Model):
-    family = models.ForeignKey(Family, on_delete=models.CASCADE)
+    # family = models.ForeignKey(Family, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     date = models.DateField()
     amount = models.IntegerField()
@@ -38,7 +38,7 @@ class Expense(models.Model):
 
 # --- 固定費 ---
 class FixedCost(models.Model):
-    user = models.ForeignKey(Family, on_delete=models.CASCADE)
+    # user = models.ForeignKey(Family, on_delete=models.CASCADE)
     name = models.CharField("固定費名", max_length=100)
     amount = models.IntegerField("金額")
     category = models.ForeignKey(Category, verbose_name="カテゴリ", on_delete=models.CASCADE)
