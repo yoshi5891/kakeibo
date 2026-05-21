@@ -154,31 +154,28 @@ def expense_chart(request):
 def expense_summary_month(request, year, month):
     family = None
 
-    month_start = date(year, month, 1)
-    last_day = monthrange(year, month)[1]
-    month_end = date(year, month, last_day)
+    # 当月25日を締め日とする
+    month_end = date(year, month, 25)
+    month_start = month_end - relativedelta(months=1) + timedelta(days=1)
 
     total = Expense.objects.filter(
         date__gte=month_start,
         date__lte=month_end
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    prev_year = year if month > 1 else year - 1
-    prev_month = month - 1 if month > 1 else 12
-
-    next_year = year if month < 12 else year + 1
-    next_month = month + 1 if month < 12 else 1
+    # 前月・翌月
+    prev = month_end - relativedelta(months=1)
+    next_ = month_end + relativedelta(months=1)
 
     return render(request, 'kakeibo/expense_summary_month.html', {
         'total': total,
         'year': year,
         'month': month,
-        'prev_year': prev_year,
-        'prev_month': prev_month,
-        'next_year': next_year,
-        'next_month': next_month,
+        'prev_year': prev.year,
+        'prev_month': prev.month,
+        'next_year': next_.year,
+        'next_month': next_.month,
     })
-
 
 @login_required
 def expense_filter(request):
@@ -212,51 +209,61 @@ def expense_chart_bar(request):
         'totals': totals,
     })
 
-
 @login_required
 def dashboard(request):
     family = None
 
     month_str = request.GET.get('month')
 
+    # 25日締めの基準日を決定
     if month_str:
         year, month = map(int, month_str.split('-'))
-        target_date = date(year, month, 1)
+        target_date = date(year, month, 25)
     else:
-        target_date = date.today().replace(day=1)
+        today = date.today()
+        if today.day >= 26:
+            target_date = date(today.year, today.month, 25)
+        else:
+            prev = today - relativedelta(months=1)
+            target_date = date(prev.year, prev.month, 25)
 
-    start_date = target_date
-    end_date = (target_date + relativedelta(months=1)) - timedelta(days=1)
+    # 集計期間：前月26日〜当月25日
+    start_date = target_date - relativedelta(months=1) + timedelta(days=1)
+    end_date = target_date
 
     expenses = Expense.objects.filter(date__range=(start_date, end_date))
 
+    # 日別集計
     days_in_month = (end_date - start_date).days + 1
     date_labels = [(start_date + timedelta(days=i)).day for i in range(days_in_month)]
     daily_totals = [0] * days_in_month
 
     for expense in expenses:
-        day_index = expense.date.day - 1
+        day_index = (expense.date - start_date).days
         daily_totals[day_index] += expense.amount
 
+    # 前月・翌月（正しく1ヶ月移動）
     prev_month_date = target_date - relativedelta(months=1)
     next_month_date = target_date + relativedelta(months=1)
 
     prev_month_str = prev_month_date.strftime('%Y-%m')
     next_month_str = next_month_date.strftime('%Y-%m')
 
+    # 合計
     total = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
-    prev_year = prev_month_date.year
-    prev_month_num = prev_month_date.month
-
+    # 前月合計
     prev_month_total = Expense.objects.filter(
-        date__year=prev_year,
-        date__month=prev_month_num
+        date__range=(
+            prev_month_date - relativedelta(months=1) + timedelta(days=1),
+            prev_month_date
+        )
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
     diff = total - prev_month_total
     diff_color = "red" if diff > 0 else "blue"
 
+    # カテゴリ別
     data = expenses.values('category__name').annotate(total=Sum('amount'))
     labels = [item['category__name'] for item in data]
     totals = [item['total'] for item in data]
@@ -288,7 +295,6 @@ def dashboard(request):
         'diff': diff,
         'diff_color': diff_color,
     })
-
 
 @login_required
 def category_list(request):
