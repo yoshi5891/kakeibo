@@ -21,6 +21,9 @@ CATEGORY_COLORS = {
     "交通費": "#FFCE56",
     "交際費": "#4BC0C0",
     "その他": "#9966FF",
+    "固定費": "#8BC34A",
+    "(み)こづかい": "#FF43D3",
+    "(よ)こづかい": "#434CFF",
 }
 
 CATEGORY_KEYWORDS = {
