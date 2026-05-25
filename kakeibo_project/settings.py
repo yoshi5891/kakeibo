@@ -87,10 +87,11 @@ import os
 DATABASES = {
     "default": {
         "ENGINE": "django_libsql",
-        "NAME": "libsql://mydb-yoshi5891.aws-ap-northeast-1.turso.io",
-        "OPTIONS": {
-            "authToken": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzkyODQwMDgsImlkIjoiMDE5ZTQ1OTUtMWUwMS03OGM2LTk3NmQtMTNmMDFkZDRhNTFiIiwicmlkIjoiMTI1YjA5NzYtN2YxZi00NTRhLTkwZGUtZTM0ZTE2NDMyOWEzIn0.Zr5zp0MnGNxOrxHH4qBnF3kKYYe97hrkhMetRpNhGscNmYTALjL9O0rqZig54o0gRmfysc3lqLQy9R-H9BbZDg"
-        }
+        "NAME": "libsql",
+        "CLIENT": {
+            "url": os.environ.get("TURSO_DATABASE_URL"),
+            "authToken": os.environ.get("TURSO_AUTH_TOKEN"),
+        },
     }
 }
 
