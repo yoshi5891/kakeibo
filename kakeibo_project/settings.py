@@ -85,20 +85,15 @@ WSGI_APPLICATION = "kakeibo_project.wsgi.application"
 import dj_database_url
 import os
 
-if os.environ.get('DATABASE_URL'):
-    # 本番（Render）
-    DATABASES = {
-        'default': dj_database_url.config(conn_max_age=600)
-    }
-    
-else:
-    # ローカル（SQLite）
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+DATABASES = {
+    "default": {
+        "ENGINE": "django_libsql",
+        "NAME": "libsql://mydb-yoshi5891.aws-ap-northeast-1.turso.io",
+        "OPTIONS": {
+            "authToken": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzkyODQwMDgsImlkIjoiMDE5ZTQ1OTUtMWUwMS03OGM2LTk3NmQtMTNmMDFkZDRhNTFiIiwicmlkIjoiMTI1YjA5NzYtN2YxZi00NTRhLTkwZGUtZTM0ZTE2NDMyOWEzIn0.Zr5zp0MnGNxOrxHH4qBnF3kKYYe97hrkhMetRpNhGscNmYTALjL9O0rqZig54o0gRmfysc3lqLQy9R-H9BbZDg"
         }
     }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
