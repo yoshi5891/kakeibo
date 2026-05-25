@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     "django.contrib.humanize",
     "kakeibo", #追加
+    "django_libsql",
 ]
 
 MIDDLEWARE = [
