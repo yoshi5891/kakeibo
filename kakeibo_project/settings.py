@@ -36,6 +36,8 @@ if ALLOWED_HOSTS == [''] or ALLOWED_HOSTS == []:
 # Application definition
 
 INSTALLED_APPS = [
+    "django_libsql",
+
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -44,8 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     "django.contrib.humanize",
-    "kakeibo", #追加
-    "django_libsql",
+    "kakeibo", #追加    
 ]
 
 MIDDLEWARE = [
