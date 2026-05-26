@@ -88,10 +88,10 @@ import os
 DATABASES = {
     "default": {
         "ENGINE": "libsql.db.backends.sqlite3",
-        "NAME": (
-            f"{os.environ.get('TURSO_DATABASE_URL')}"
-            f"?authToken={os.environ.get('TURSO_AUTH_TOKEN')}"
-        ),
+        "NAME": os.environ.get("TURSO_DATABASE_URL"),
+        "OPTIONS": {
+            "auth_token": os.environ.get("TURSO_AUTH_TOKEN"),
+        },
     }
 }
 
