@@ -91,6 +91,7 @@ DATABASES = {
         "NAME": os.environ.get("TURSO_DATABASE_URL"),
         "OPTIONS": {
             "auth_token": os.environ.get("TURSO_AUTH_TOKEN"),
+            "secure": True,
         },
     }
 }
