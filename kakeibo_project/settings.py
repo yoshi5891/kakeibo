@@ -87,8 +87,11 @@ import os
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django_libsql",
+        "NAME": os.environ.get("TURSO_DATABASE_URL"),
+        "OPTIONS": {
+            "auth_token": os.environ.get("TURSO_AUTH_TOKEN"),
+        },
     }
 }
 
