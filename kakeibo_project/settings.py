@@ -36,7 +36,7 @@ if ALLOWED_HOSTS == [''] or ALLOWED_HOSTS == []:
 # Application definition
 
 INSTALLED_APPS = [
-    "django_libsql",
+    #"django_libsql",
 
     "django.contrib.admin",
     "django.contrib.auth",
