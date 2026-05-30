@@ -504,14 +504,14 @@ def logout_view(request):
     return redirect('login')
 
 from django.shortcuts import render
-from .forms import ReceiptForm
+#from .forms import ReceiptForm
 from .utils.ocr import run_ocr
 
 def upload_receipt(request):
     text = None
 
     if request.method == "POST":
-        form = ReceiptForm(request.POST, request.FILES)
+        form = UploadImageForm(request.POST, request.FILES)
 
         if form.is_valid():
             image = form.cleaned_data["image"]
@@ -526,7 +526,7 @@ def upload_receipt(request):
             text = run_ocr(image_path)
 
     else:
-        form = ReceiptForm()
+        form = UploadImageForm()
 
     return render(request, "upload_receipt.html", {"form": form, "text": text})
 
