@@ -4,8 +4,8 @@ import requests
 from datetime import datetime
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
-REPO = "yoshi5891/kakeibo"  # ← あなたのバックアップ用リポジトリ名に変更
-FILE_PATH = "backups/backup.json"
+REPO = "yoshi5891/kakeibo"
+FILE_PATH = "backup.json"
 
 def upload_to_github():
     if not GITHUB_TOKEN:
@@ -13,7 +13,7 @@ def upload_to_github():
         return
 
     today = datetime.now().strftime("%Y-%m-%d")
-    github_file_path = f"backup-{today}.json"
+    github_file_path = f"backups/backup-{today}.json"  # ← ここが重要！
 
     with open(FILE_PATH, "rb") as f:
         content = f.read()
@@ -35,7 +35,6 @@ def upload_to_github():
     response = requests.put(url, json=data, headers=headers)
 
     print("GitHub Response:", response.status_code, response.text)
-
 
 if __name__ == "__main__":
     upload_to_github()
