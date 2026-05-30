@@ -4,8 +4,8 @@ import requests
 from datetime import datetime
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
-REPO = "yoshi5891/kakeibo/backups"  # ← あなたのバックアップ用リポジトリ名に変更
-FILE_PATH = "backup.json"
+REPO = "yoshi5891/kakeibo"  # ← あなたのバックアップ用リポジトリ名に変更
+FILE_PATH = "backups/backup.json"
 
 def upload_to_github():
     if not GITHUB_TOKEN:
