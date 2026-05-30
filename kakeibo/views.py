@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Expense, Category
 from .forms import UploadImageForm
+from .utils.ocr import run_ocr
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum
@@ -13,6 +14,7 @@ from PIL import Image
 import re
 import cv2
 import numpy as np
+
 
 # --- カテゴリごとの固定色設定 ---
 CATEGORY_COLORS = {
@@ -348,44 +350,92 @@ def category_delete(request, pk):
 
 # --- OCR 関連はそのまま ---
 def extract_total(text):
+    # 全角 → 半角
+    t = text.replace("￥", "¥").replace("円", "").replace("　", " ")
+    t = t.replace(",", "").replace("．", ".").replace("。", ".")
+
+    # よくある金額表現
     patterns = [
-        r"合計[^\d]*([\d,\.]+)",
-        r"合\s*計[^\d]*([\d,\.]+)",
-        r"計[^\d]*([\d,\.]+)",
-        r"半[^\d]*([\d,\.]+)",
+        r"合計[^\d]*(\d+)",          # 合計 1234
+        r"ご請求金額[^\d]*(\d+)",    # ご請求金額 1234
+        r"お買い上げ金額[^\d]*(\d+)",# お買い上げ金額 1234
+        r"計[^\d]*(\d+)",            # 計 1234
+        r"¥\s*(\d+)",                # ¥ 1234
+        r"¥(\d+)",                   # ¥1234
+        r"(\d+)\s*円",               # 1234円
+        r"金額[^\d]*(\d+)",          # 金額 1234
     ]
+
     for pattern in patterns:
-        match = re.search(pattern, text)
+        match = re.search(pattern, t)
         if match:
-            value = match.group(1)
-            value = value.replace(",", "").replace(".", "")
-            return value
+            return match.group(1)
+
+    # fallback：数字が複数ある場合、最大値を合計とみなす
+    numbers = re.findall(r"\d{3,}", t)
+    if numbers:
+        return max(numbers, key=lambda x: int(x))
+
     return None
 
 
 def extract_date(text):
+    # 全角 → 半角
+    t = text.replace("年", "/").replace("月", "/").replace("日", "")
+    t = t.replace("．", ".").replace("。", ".")
+    t = t.replace("ー", "-").replace("―", "-").replace("−", "-")
+    t = t.replace("／", "/").replace(" ", "")
+
+    # パターン一覧（表記ゆれを全部拾う）
     patterns = [
-        r"(\d{4}\s*[-/\.]\s*\d{1,2}\s*[-/\.]\s*\d{1,2})",
-        r"(\d{4}年\s*\d{1,2}月\s*\d{1,2}日)",
-        r"(\d{2}\s*[-/\.]\s*\d{1,2}\s*\d{1,2})",
+        r"(\d{4}[-/\.]\d{1,2}[-/\.]\d{1,2})",  # 2024/5/3, 2024-5-3
+        r"(\d{4}\.\d{1,2}\.\d{1,2})",          # 2024.5.3
+        r"(\d{2}[-/\.]\d{1,2}[-/\.]\d{1,2})",  # 24/5/3
+        r"(\d{4}/\d{1,2}/\d{1,2})",            # 2024/05/03
+        r"(\d{1,2}/\d{1,2})",                  # 5/3（年が無い場合 → 今年扱い）
     ]
+
     for pattern in patterns:
-        match = re.search(pattern, text)
+        match = re.search(pattern, t)
         if match:
-            return match.group(1).replace(" ", "")
+            date_str = match.group(1)
+
+            # 年が無い場合は今年を補完
+            if re.match(r"^\d{1,2}/\d{1,2}$", date_str):
+                year = date.today().year
+                return f"{year}/{date_str}"
+
+            return date_str
+
     return None
 
 
 def estimate_category(text):
-    text = text.lower()
-    if "マック" in text or "バーガー" in text:
-        return 1
-    if "電車" in text or "バス" in text:
-        return 2
-    if "日用品" in text:
-        return 3
-    if "交際" in text:
-        return 4
+    # OCR の表記ゆれ対策（全角 → 半角、スペース除去）
+    t = text.replace("　", " ").replace(" ", "")
+    t = t.lower()
+
+    # カテゴリごとのキーワード辞書を使う
+    for category, keywords in CATEGORY_KEYWORDS.items():
+        for word in keywords:
+            if word.lower() in t:
+                return category
+
+    # fallback：食べ物系の単語が多い場合 → 食費
+    food_words = ["弁当", "定食", "ランチ", "カフェ", "パン", "寿司", "そば", "うどん"]
+    if any(w in t for w in food_words):
+        return "食費"
+
+    # fallback：交通系
+    transport_words = ["駅", "線", "バス", "タクシー"]
+    if any(w in t for w in transport_words):
+        return "交通費"
+
+    # fallback：日用品
+    daily_words = ["薬局", "ドラッグ", "ホームセンター"]
+    if any(w in t for w in daily_words):
+        return "日用品"
+
     return None
 
 
@@ -453,4 +503,31 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
-# dummy change
+from django.shortcuts import render
+from .forms import ReceiptForm
+from .utils.ocr import run_ocr
+
+def upload_receipt(request):
+    text = None
+
+    if request.method == "POST":
+        form = ReceiptForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            image = form.cleaned_data["image"]
+
+            # 一時保存
+            image_path = f"/tmp/{image.name}"
+            with open(image_path, "wb+") as destination:
+                for chunk in image.chunks():
+                    destination.write(chunk)
+
+            # --- 改良ポイント：前処理 + OCR ---
+            text = run_ocr(image_path)
+
+    else:
+        form = ReceiptForm()
+
+    return render(request, "upload_receipt.html", {"form": form, "text": text})
+
+
