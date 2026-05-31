@@ -41,9 +41,14 @@
                 {% endfor %}
             </select>
 
-            <!-- ★ 常に表示されるカテゴリ追加ボタン -->
+            <!-- カテゴリ追加 -->
             <a href="{% url 'category_add' %}" class="btn btn-success">
                 ＋
+            </a>
+
+            <!-- カテゴリ一覧（削除可能） -->
+            <a href="{% url 'category_list' %}" class="btn btn-outline-danger">
+                🗂
             </a>
         </div>
     </div>
