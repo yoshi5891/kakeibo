@@ -224,4 +224,14 @@
     今日の支出：{{ today_total|intcomma }} 円
 </div>
 
+{% if user.is_superuser %}
+<div class="text-center mt-4">
+    <a href="/restore/"
+       class="btn btn-danger"
+       onclick="return confirm('最新バックアップを復元しますか？')">
+        バックアップ復元
+    </a>
+</div>
+{% endif %}
+
 {% endblock %}

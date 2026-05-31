@@ -546,13 +546,31 @@ GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 @login_required
 def restore_data(request):
 
+    if not request.user.is_superuser:
+        return HttpResponse(
+            "Permission denied",
+            status=403
+        )
+
     if not GITHUB_TOKEN:
         return HttpResponse("ERROR: GITHUB_TOKEN is not set on the server.")
 
     # GitHub API からバックアップ一覧を取得
     url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/backups"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-    res = requests.get(url, headers=headers).json()
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        return HttpResponse(
+            f"""
+            GitHub API Error<br>
+            Status: {response.status_code}<br>
+            <pre>{response.text}</pre>
+            """
+        )
+
+    res = response.json()
 
     # backup-YYYY-MM-DD.json のみ抽出
     backups = [f for f in res if f["name"].startswith("backup-") and f["name"].endswith(".json")]
@@ -567,7 +585,18 @@ def restore_data(request):
     download_url = latest["download_url"]
 
     # ファイル内容を取得
-    backup_data = requests.get(download_url).text
+    download_response = requests.get(download_url)
+
+    if download_response.status_code != 200:
+        return HttpResponse(
+            f"""
+            Backup download failed<br>
+            Status: {download_response.status_code}<br>
+            <pre>{download_response.text}</pre>
+            """
+        )
+
+    backup_data = download_response.text
 
     # 一時ファイルに保存
     tmp_path = "/tmp/restore.json"
@@ -575,7 +604,29 @@ def restore_data(request):
         f.write(backup_data)
 
     # loaddata 実行
-    subprocess.run(["python", "manage.py", "loaddata", tmp_path])
+    result = subprocess.run(
+        ["python", "manage.py", "loaddata", tmp_path],
+        capture_output=True,
+        text=True
+    )
 
-    return HttpResponse(f"Restored from {latest['name']}")
+    if result.returncode != 0:
+        return HttpResponse(
+            f"Restore failed<br><pre>{result.stderr}</pre>"
+        )
+
+    return HttpResponse(
+        f"""
+        Restore completed.<br><br>
+
+        File:
+        {latest['name']}<br><br>
+
+        Result:<br>
+
+        <pre>
+        {result.stdout}
+        </pre>
+        """
+    )
 
