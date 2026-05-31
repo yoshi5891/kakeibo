@@ -43,9 +43,8 @@ CATEGORY_KEYWORDS = {
 def expense_create(request):
     family = None
 
-    # --- カテゴリ追加後に戻ってきた場合、GET パラメータをクリア ---
-    referer = request.META.get('HTTP_REFERER', '')
-    if 'category' in request.GET and '/categories/add/' in referer:
+    # --- カテゴリ追加後の戻りを判定（?from=category_add を使う） ---
+    if request.GET.get('from') == 'category_add':
         return redirect('/add/')
 
     amount = request.GET.get('amount')
@@ -326,7 +325,7 @@ def category_add(request):
         Category.objects.create(
             name=name,
         )
-        return redirect('/add/')
+        return redirect('/add/?from=category_add')
 
     return render(request, 'kakeibo/category_form.html')
 

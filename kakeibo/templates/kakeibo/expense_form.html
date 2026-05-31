@@ -28,7 +28,7 @@
     <div class="mb-3">
         <label class="form-label">カテゴリ</label>
 
-        {% if categories %}
+        <div class="d-flex gap-2">
             <select name="category" class="form-select" required>
                 {% for category in categories %}
                     <option value="{{ category.id }}"
@@ -40,14 +40,12 @@
                     </option>
                 {% endfor %}
             </select>
-        {% else %}
-            <div class="alert alert-warning">
-                カテゴリがありません。<br>
-                <a href="{% url 'category_add' %}" class="btn btn-sm btn-success mt-2">
-                    カテゴリを追加する
-                </a>
-            </div>
-        {% endif %}
+
+            <!-- ★ 常に表示されるカテゴリ追加ボタン -->
+            <a href="{% url 'category_add' %}" class="btn btn-success">
+                ＋
+            </a>
+        </div>
     </div>
 
     <!-- 金額 -->
