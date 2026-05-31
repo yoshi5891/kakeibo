@@ -533,4 +533,49 @@ def upload_receipt(request):
 
     return render(request, "upload_receipt.html", {"form": form, "text": text})
 
+#ここからバックアップ復元機能
+import requests
+import subprocess
+from django.http import HttpResponse
+import os
+
+GITHUB_OWNER = "yoshi5891"
+GITHUB_REPO = "kakeibo"
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+
+@login_required
+def restore_data(request):
+
+    if not GITHUB_TOKEN:
+        return HttpResponse("ERROR: GITHUB_TOKEN is not set on the server.")
+
+    # GitHub API からバックアップ一覧を取得
+    url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    res = requests.get(url, headers=headers).json()
+
+    # backup-YYYY-MM-DD.json のみ抽出
+    backups = [f for f in res if f["name"].startswith("backup-") and f["name"].endswith(".json")]
+
+    if not backups:
+        return HttpResponse("No backup files found")
+
+    # 最新日付のバックアップを選択
+    latest = sorted(backups, key=lambda x: x["name"], reverse=True)[0]
+
+    # ダウンロード URL
+    download_url = latest["download_url"]
+
+    # ファイル内容を取得
+    backup_data = requests.get(download_url).text
+
+    # 一時ファイルに保存
+    tmp_path = "/tmp/restore.json"
+    with open(tmp_path, "w") as f:
+        f.write(backup_data)
+
+    # loaddata 実行
+    subprocess.run(["python", "manage.py", "loaddata", tmp_path])
+
+    return HttpResponse(f"Restored from {latest['name']}")
 
