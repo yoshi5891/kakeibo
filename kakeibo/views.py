@@ -550,7 +550,7 @@ def restore_data(request):
         return HttpResponse("ERROR: GITHUB_TOKEN is not set on the server.")
 
     # GitHub API からバックアップ一覧を取得
-    url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/"
+    url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/backups"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     res = requests.get(url, headers=headers).json()
 
