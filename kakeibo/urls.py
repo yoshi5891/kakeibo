@@ -24,6 +24,8 @@ urlpatterns = [
     path('categories/<int:pk>/edit/', views.category_edit, name='category_edit'),
     path('categories/<int:pk>/delete/', views.category_delete, name='category_delete'),
 
+    path('restore/', views.restore_data, name='restore_data'),
+
     # ログイン・ログアウト
     path('login/', auth_views.LoginView.as_view(template_name='kakeibo/login.html'), name='login'),
     path('logout/', views.logout_view, name='logout'),
