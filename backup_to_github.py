@@ -5,7 +5,7 @@ from datetime import datetime
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 REPO = "yoshi5891/kakeibo"
-FILE_PATH = "backup.json"
+FILE_PATH = "/tmp/backup.json"
 
 def upload_to_github():
     if not GITHUB_TOKEN:

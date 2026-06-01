@@ -630,5 +630,55 @@ def restore_data(request):
         """
     )
 
-#test
+@login_required
+def backup_data(request):
 
+    if not request.user.is_superuser:
+        return HttpResponse(
+            "Permission denied",
+            status=403
+        )
+
+    result = subprocess.run(
+        [
+            "python",
+            "manage.py",
+            "dumpdata",
+            "--natural-foreign",
+            "--natural-primary",
+            "--indent",
+            "2"
+        ],
+        capture_output=True,
+        text=True
+    )
+
+    if result.returncode != 0:
+        return HttpResponse(
+            f"Backup failed<br><pre>{result.stderr}</pre>"
+        )
+
+    with open("/tmp/backup.json", "w", encoding="utf-8") as f:
+        f.write(result.stdout)
+
+    upload_result = subprocess.run(
+        ["python", "backup_to_github.py"],
+        capture_output=True,
+        text=True
+    )
+
+    if upload_result.returncode != 0:
+        return HttpResponse(
+            f"GitHub upload failed<br><pre>{upload_result.stderr}</pre>"
+        )
+
+    return HttpResponse(
+        f"""
+        Backup completed.<br><br>
+
+        <pre>
+        {upload_result.stdout}
+        {upload_result.stderr}
+        </pre>
+        """
+    )
