@@ -12,8 +12,8 @@ def upload_to_github():
         print("GITHUB_TOKEN が設定されていません")
         return
 
-    today = datetime.now().strftime("%Y-%m-%d")
-    github_file_path = f"backups/backup-{today}.json"  # ← ここが重要！
+    today = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    github_file_path = f"backups/backup-{today}.json"
 
     with open(FILE_PATH, "rb") as f:
         content = f.read()
@@ -35,6 +35,8 @@ def upload_to_github():
     response = requests.put(url, json=data, headers=headers)
 
     print("GitHub Response:", response.status_code, response.text)
+
+    return response.status_code == 201
 
 if __name__ == "__main__":
     upload_to_github()

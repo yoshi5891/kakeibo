@@ -9,6 +9,8 @@ from calendar import monthrange
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from pathlib import Path
 import pytesseract
 from PIL import Image
 import re
@@ -219,6 +221,39 @@ def expense_chart_bar(request):
 
 @login_required
 def dashboard(request):
+
+    if should_backup():
+        try:
+            import subprocess
+
+            with open("/tmp/backup.json", "w", encoding="utf-8") as f:
+                subprocess.run(
+                    [
+                        "python",
+                        "manage.py",
+                        "dumpdata",
+                        "kakeibo",
+                        "--natural-foreign",
+                        "--natural-primary",
+                        "--indent",
+                        "2"
+                    ],
+                    stdout=f
+                )
+
+            from backup_to_github import upload_to_github
+
+            success = upload_to_github()
+
+            if success:
+                save_backup_time()
+            else:
+                print("GitHub backup failed")
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+
     family = None
 
     month_str = request.GET.get('month')
@@ -644,8 +679,7 @@ def backup_data(request):
             "python",
             "manage.py",
             "dumpdata",
-            "--natural-foreign",
-            "--natural-primary",
+            "kakeibo",
             "--indent",
             "2"
         ],
@@ -682,3 +716,24 @@ def backup_data(request):
         </pre>
         """
     )
+
+BACKUP_TIME_FILE = "last_backup.txt"
+
+
+def should_backup():
+    from datetime import datetime, timedelta
+
+    try:
+        with open(BACKUP_TIME_FILE, "r") as f:
+            last = datetime.fromisoformat(f.read().strip())
+
+        return datetime.now() - last > timedelta(hours=24)
+
+    except:
+        return True
+
+def save_backup_time():
+    from datetime import datetime
+
+    with open(BACKUP_TIME_FILE, "w") as f:
+        f.write(datetime.now().isoformat())    
