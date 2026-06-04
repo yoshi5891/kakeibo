@@ -223,36 +223,36 @@ def expense_chart_bar(request):
 def dashboard(request):
 
     if should_backup():
-        try:
-            import subprocess
+    try:
+        import subprocess
 
-            with open("/tmp/backup.json", "w", encoding="utf-8") as f:
-                subprocess.run(
-                    [
-                        "python",
-                        "manage.py",
-                        "dumpdata",
-                        "kakeibo",
-                        "--natural-foreign",
-                        "--natural-primary",
-                        "--indent",
-                        "2"
-                    ],
-                    stdout=f
-                )
+        with open("/tmp/backup.json", "w", encoding="utf-8") as f:
+            subprocess.run(
+                [
+                    "python",
+                    "manage.py",
+                    "dumpdata",
+                    "kakeibo",
+                    "--natural-foreign",
+                    "--natural-primary",
+                    "--indent",
+                    "2"
+                ],
+                stdout=f
+            )
 
-            from backup_to_github import upload_to_github
+        from backup_to_github import upload_to_github
 
-            success = upload_to_github()
+        success = upload_to_github()
 
-            if success:
-                save_backup_time()
-            else:
-                print("GitHub backup failed")
+        if success:
+            save_backup_time()
+        else:
+            print("GitHub backup failed")
 
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
 
     family = None
 
@@ -669,11 +669,9 @@ def restore_data(request):
 def backup_data(request):
 
     if not request.user.is_superuser:
-        return HttpResponse(
-            "Permission denied",
-            status=403
-        )
+        return HttpResponse("Permission denied", status=403)
 
+    # --- ① dumpdata を JSON に出力 ---
     result = subprocess.run(
         [
             "python",
@@ -688,15 +686,36 @@ def backup_data(request):
     )
 
     if result.returncode != 0:
-        return HttpResponse(
-            f"Backup failed<br><pre>{result.stderr}</pre>"
-        )
+        return HttpResponse(f"Backup failed<br><pre>{result.stderr}</pre>")
 
-    with open("/tmp/backup.json", "w", encoding="utf-8") as f:
+    # JSON を一時保存
+    json_path = "/tmp/backup.json"
+    with open(json_path, "w", encoding="utf-8") as f:
         f.write(result.stdout)
 
+    # --- ② ZIP を作成 ---
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    zip_path = f"/tmp/backup-{timestamp}.zip"
+
+    import zipfile
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+        zipf.write(json_path, arcname="data.json")
+
+        # .env があれば追加
+        env_path = os.path.join(settings.BASE_DIR, ".env")
+        if os.path.exists(env_path):
+            zipf.write(env_path, arcname=".env")
+
+        # metadata
+        metadata_path = "/tmp/metadata.txt"
+        with open(metadata_path, "w") as f:
+            f.write(f"Backup created at: {timestamp}\n")
+            f.write(f"User: {request.user}\n")
+        zipf.write(metadata_path, arcname="metadata.txt")
+
+    # --- ③ GitHub に ZIP をアップロード ---
     upload_result = subprocess.run(
-        ["python", "backup_to_github.py"],
+        ["python", "backup_to_github.py", zip_path],
         capture_output=True,
         text=True
     )
@@ -709,7 +728,7 @@ def backup_data(request):
     return HttpResponse(
         f"""
         Backup completed.<br><br>
-
+        File: backup-{timestamp}.zip<br><br>
         <pre>
         {upload_result.stdout}
         {upload_result.stderr}

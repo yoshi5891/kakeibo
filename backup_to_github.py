@@ -1,42 +1,52 @@
-import os
 import base64
+import os
 import requests
-from datetime import datetime
+import sys
 
+GITHUB_OWNER = "yoshi5891"
+GITHUB_REPO = "kakeibo"
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
-REPO = "yoshi5891/kakeibo"
-FILE_PATH = "/tmp/backup.json"
 
-def upload_to_github():
+def upload_to_github(zip_path):
+
     if not GITHUB_TOKEN:
-        print("GITHUB_TOKEN が設定されていません")
-        return
+        print("ERROR: GITHUB_TOKEN is not set")
+        return False
 
-    today = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    github_file_path = f"backups/backup-{today}.json"
+    filename = os.path.basename(zip_path)
 
-    with open(FILE_PATH, "rb") as f:
+    with open(zip_path, "rb") as f:
         content = f.read()
 
-    encoded = base64.b64encode(content).decode()
+    encoded = base64.b64encode(content).decode("utf-8")
 
-    url = f"https://api.github.com/repos/{REPO}/contents/{github_file_path}"
+    url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/backups/{filename}"
 
     data = {
-        "message": f"Backup on {today}",
-        "content": encoded,
+        "message": f"Backup {filename}",
+        "content": encoded
     }
 
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json"
     }
 
     response = requests.put(url, json=data, headers=headers)
 
-    print("GitHub Response:", response.status_code, response.text)
+    if response.status_code in (200, 201):
+        print("Upload success")
+        return True
+    else:
+        print("Upload failed")
+        print(response.text)
+        return False
 
-    return response.status_code == 201
 
 if __name__ == "__main__":
-    upload_to_github()
+    if len(sys.argv) < 2:
+        print("Usage: python backup_to_github.py <zip_path>")
+        sys.exit(1)
+
+    zip_path = sys.argv[1]
+    upload_to_github(zip_path)
