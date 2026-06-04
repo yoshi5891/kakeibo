@@ -222,38 +222,6 @@ def expense_chart_bar(request):
 @login_required
 def dashboard(request):
 
-    if should_backup():
-    try:
-        import subprocess
-
-        with open("/tmp/backup.json", "w", encoding="utf-8") as f:
-            subprocess.run(
-                [
-                    "python",
-                    "manage.py",
-                    "dumpdata",
-                    "kakeibo",
-                    "--natural-foreign",
-                    "--natural-primary",
-                    "--indent",
-                    "2"
-                ],
-                stdout=f
-            )
-
-        from backup_to_github import upload_to_github
-
-        success = upload_to_github()
-
-        if success:
-            save_backup_time()
-        else:
-            print("GitHub backup failed")
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-
     family = None
 
     month_str = request.GET.get('month')
