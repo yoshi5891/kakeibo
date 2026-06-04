@@ -550,15 +550,12 @@ GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 def restore_data(request):
 
     if not request.user.is_superuser:
-        return HttpResponse(
-            "Permission denied",
-            status=403
-        )
+        return HttpResponse("Permission denied", status=403)
 
     if not GITHUB_TOKEN:
         return HttpResponse("ERROR: GITHUB_TOKEN is not set on the server.")
 
-    # GitHub API からバックアップ一覧を取得
+    # GitHub API から ZIP バックアップ一覧を取得
     url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/backups"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
 
@@ -566,70 +563,65 @@ def restore_data(request):
 
     if response.status_code != 200:
         return HttpResponse(
-            f"""
-            GitHub API Error<br>
-            Status: {response.status_code}<br>
-            <pre>{response.text}</pre>
-            """
+            f"GitHub API Error<br>Status: {response.status_code}<br><pre>{response.text}</pre>"
         )
 
     res = response.json()
 
-    # backup-YYYY-MM-DD.json のみ抽出
-    backups = [f for f in res if f["name"].startswith("backup-") and f["name"].endswith(".json")]
+    # backup-YYYY-MM-DD.zip のみ抽出
+    backups = [f for f in res if f["name"].startswith("backup-") and f["name"].endswith(".zip")]
 
     if not backups:
-        return HttpResponse("No backup files found")
+        return HttpResponse("No ZIP backup files found")
 
-    # 最新日付のバックアップを選択
+    # 最新 ZIP を選択
     latest = sorted(backups, key=lambda x: x["name"], reverse=True)[0]
 
     # ダウンロード URL
     download_url = latest["download_url"]
 
-    # ファイル内容を取得
+    # ZIP を取得
     download_response = requests.get(download_url)
 
     if download_response.status_code != 200:
         return HttpResponse(
-            f"""
-            Backup download failed<br>
-            Status: {download_response.status_code}<br>
-            <pre>{download_response.text}</pre>
-            """
+            f"Backup download failed<br>Status: {download_response.status_code}<br><pre>{download_response.text}</pre>"
         )
 
-    backup_data = download_response.text
+    # ZIP を一時保存
+    zip_path = "/tmp/restore.zip"
+    with open(zip_path, "wb") as f:
+        f.write(download_response.content)
 
-    # 一時ファイルに保存
-    tmp_path = "/tmp/restore.json"
-    with open(tmp_path, "w") as f:
-        f.write(backup_data)
+    # ZIP を解凍
+    import zipfile
+    extract_dir = "/tmp/restore_zip"
+    os.makedirs(extract_dir, exist_ok=True)
+
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(extract_dir)
+
+    # data.json を探す
+    json_path = os.path.join(extract_dir, "data.json")
+    if not os.path.exists(json_path):
+        return HttpResponse("data.json not found inside ZIP")
 
     # loaddata 実行
     result = subprocess.run(
-        ["python", "manage.py", "loaddata", tmp_path],
+        ["python", "manage.py", "loaddata", json_path],
         capture_output=True,
         text=True
     )
 
     if result.returncode != 0:
-        return HttpResponse(
-            f"Restore failed<br><pre>{result.stderr}</pre>"
-        )
+        return HttpResponse(f"Restore failed<br><pre>{result.stderr}</pre>")
 
     return HttpResponse(
         f"""
         Restore completed.<br><br>
-
-        File:
-        {latest['name']}<br><br>
-
+        File: {latest['name']}<br><br>
         Result:<br>
-
-        <pre>
-        {result.stdout}
-        </pre>
+        <pre>{result.stdout}</pre>
         """
     )
 
