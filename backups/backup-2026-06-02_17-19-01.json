@@ -1,0 +1,26 @@
+[
+{
+  "model": "kakeibo.family",
+  "pk": 1,
+  "fields": {
+    "name": "yoshi"
+  }
+},
+{
+  "model": "kakeibo.family",
+  "pk": 2,
+  "fields": {
+    "name": "mitsue"
+  }
+},
+{
+  "model": "kakeibo.profile",
+  "pk": 1,
+  "fields": {
+    "user": [
+      "yoshi"
+    ],
+    "family": 2
+  }
+}
+]
