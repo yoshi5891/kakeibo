@@ -25,7 +25,7 @@ urlpatterns = [
     path('categories/<int:pk>/delete/', views.category_delete, name='category_delete'),
 
     path("backup/", views.backup_data, name="backup"),
-    path('restore/', views.restore_data, name='restore_data'),
+    path('restore_data/', views.restore_data, name='restore_data'),
     path("backup_list/", views.backup_list, name="backup_list"),
 
     # ログイン・ログアウト
