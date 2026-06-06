@@ -1,0 +1,30 @@
+{% extends "kakeibo/base.html" %}
+
+{% block title %}バックアップ一覧{% endblock %}
+
+{% block content %}
+<h2>バックアップ一覧</h2>
+<p>保存されているバックアップファイルの一覧です。復元したいものを選んでください。</p>
+
+<table class="table table-striped mt-3">
+  <thead>
+    <tr>
+      <th>ファイル名</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for file in backups %}
+    <tr>
+      <td>{{ file.name }}</td>
+      <td>
+        <a href="/restore_data?file={{ file.name }}" class="btn btn-danger btn-sm">
+          このバックアップを復元
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

@@ -626,6 +626,41 @@ def restore_data(request):
     )
 
 @login_required
+def backup_list(request):
+
+    if not request.user.is_superuser:
+        return HttpResponse("Permission denied", status=403)
+
+    if not GITHUB_TOKEN:
+        return HttpResponse("ERROR: GITHUB_TOKEN is not set on the server.")
+
+    # GitHub API から ZIP バックアップ一覧を取得
+    url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/backups"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        return HttpResponse(
+            f"GitHub API Error<br>Status: {response.status_code}<br><pre>{response.text}</pre>"
+        )
+
+    res = response.json()
+
+    # ZIP のみ抽出
+    backups = [
+        f for f in res
+        if f["name"].startswith("backup-") and f["name"].endswith(".zip")
+    ]
+
+    # 日付順に並べ替え（新しい順）
+    backups = sorted(backups, key=lambda x: x["name"], reverse=True)
+
+    return render(request, "kakeibo/backup_list.html", {
+        "backups": backups
+    })
+
+@login_required
 def backup_data(request):
 
     if not request.user.is_superuser:
