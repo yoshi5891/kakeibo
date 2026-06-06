@@ -26,7 +26,7 @@ urlpatterns = [
 
     path("backup/", views.backup_data, name="backup"),
     path('restore/', views.restore_data, name='restore_data'),
-    path("backup_list/", backup_list, name="backup_list"),
+    path("backup_list/", views.backup_list, name="backup_list"),
 
     # ログイン・ログアウト
     path('login/', auth_views.LoginView.as_view(template_name='kakeibo/login.html'), name='login'),
