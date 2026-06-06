@@ -630,14 +630,9 @@ def restore_data(request):
     if result.returncode != 0:
         return HttpResponse(f"Restore failed<br><pre>{result.stderr}</pre>")
 
-    return HttpResponse(
-        f"""
-        Restore completed.<br><br>
-        Restored File: {target['name']}<br><br>
-        <pre>{result.stdout}</pre>
-        """
-    )
-
+    # ★ 復元成功 → ダッシュボードへ自動リダイレクト
+    return redirect('dashboard')
+    
 @login_required
 def backup_list(request):
 
