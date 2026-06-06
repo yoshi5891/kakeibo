@@ -232,11 +232,12 @@
     バックアップ作成
     </a>
 
-    <a href="/restore/"
-    class="btn btn-warning"
-    onclick="return confirm('最新バックアップを復元しますか？')">
-        バックアップ復元
+    <a href="{% url 'backup_list' %}"
+        class="btn btn-warning"
+        onclick="return confirm('バックアップ一覧を開きますか？')">
+            バックアップ復元
     </a>
+
 </div>
 {% endif %}
 
