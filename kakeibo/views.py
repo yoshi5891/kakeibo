@@ -555,7 +555,7 @@ def restore_data(request):
     if not GITHUB_TOKEN:
         return HttpResponse("ERROR: GITHUB_TOKEN is not set on the server.")
 
-    # GitHub API から ZIP バックアップ一覧を取得
+    # --- ① GitHub API から ZIP バックアップ一覧を取得 ---
     url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/backups"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
 
@@ -568,19 +568,33 @@ def restore_data(request):
 
     res = response.json()
 
-    # backup-YYYY-MM-DD.zip のみ抽出
-    backups = [f for f in res if f["name"].startswith("backup-") and f["name"].endswith(".zip")]
+    # ZIP のみ抽出
+    backups = [
+        f for f in res
+        if f["name"].startswith("backup-") and f["name"].endswith(".zip")
+    ]
 
     if not backups:
         return HttpResponse("No ZIP backup files found")
 
-    # 最新 ZIP を選択
-    latest = sorted(backups, key=lambda x: x["name"], reverse=True)[0]
+    # --- ② URL パラメータ file= を取得 ---
+    selected_file = request.GET.get("file")
 
-    # ダウンロード URL
-    download_url = latest["download_url"]
+    if selected_file:
+        # 一覧から一致する ZIP を探す
+        match = next((f for f in backups if f["name"] == selected_file), None)
 
-    # ZIP を取得
+        if not match:
+            return HttpResponse(f"指定されたバックアップが見つかりません: {selected_file}")
+
+        target = match
+    else:
+        # 指定がなければ最新 ZIP を使う（従来通り）
+        target = sorted(backups, key=lambda x: x["name"], reverse=True)[0]
+
+    # --- ③ ダウンロード URL ---
+    download_url = target["download_url"]
+
     download_response = requests.get(download_url)
 
     if download_response.status_code != 200:
@@ -588,12 +602,12 @@ def restore_data(request):
             f"Backup download failed<br>Status: {download_response.status_code}<br><pre>{download_response.text}</pre>"
         )
 
-    # ZIP を一時保存
+    # --- ④ ZIP を一時保存 ---
     zip_path = "/tmp/restore.zip"
     with open(zip_path, "wb") as f:
         f.write(download_response.content)
 
-    # ZIP を解凍
+    # --- ⑤ ZIP を解凍 ---
     import zipfile
     extract_dir = "/tmp/restore_zip"
     os.makedirs(extract_dir, exist_ok=True)
@@ -606,7 +620,7 @@ def restore_data(request):
     if not os.path.exists(json_path):
         return HttpResponse("data.json not found inside ZIP")
 
-    # loaddata 実行
+    # --- ⑥ loaddata 実行 ---
     result = subprocess.run(
         ["python", "manage.py", "loaddata", json_path],
         capture_output=True,
@@ -619,8 +633,7 @@ def restore_data(request):
     return HttpResponse(
         f"""
         Restore completed.<br><br>
-        File: {latest['name']}<br><br>
-        Result:<br>
+        Restored File: {target['name']}<br><br>
         <pre>{result.stdout}</pre>
         """
     )
