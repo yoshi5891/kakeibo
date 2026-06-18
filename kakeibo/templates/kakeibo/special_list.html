@@ -1,0 +1,28 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block content %}
+<h2 class="mb-4">特別費一覧</h2>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>日付</th>
+            <th>種類</th>
+            <th>金額</th>
+            <th>メモ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.date }}</td>
+            <td>{{ item.get_type_display }}</td>
+            <td>{{ item.amount|intcomma }} 円</td>
+            <td>{{ item.memo }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">戻る</a>
+{% endblock %}

@@ -759,3 +759,8 @@ def save_backup_time():
 
     with open(BACKUP_TIME_FILE, "w") as f:
         f.write(datetime.now().isoformat())    
+
+@login_required
+def special_list(request):
+    items = SpecialExpense.objects.order_by('-date')
+    return render(request, 'kakeibo/special_list.html', {'items': items})

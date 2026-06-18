@@ -47,3 +47,21 @@ class FixedCost(models.Model):
     class Meta:
         verbose_name = "固定費"
         verbose_name_plural = "固定費一覧"
+
+#　--- 特別費 ---
+class SpecialExpense(models.Model):
+    TYPE_CHOICES = [
+        ("summer_bonus", "夏ボ"),
+        ("winter_bonus", "冬ボ"),
+        ("travel", "旅行費"),
+        ("other", "その他"),
+    ]
+
+    date = models.DateField()
+    amount = models.IntegerField()
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    memo = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"{self.get_type_display()} - {self.amount}円"
+
