@@ -18,6 +18,13 @@ import re
 import cv2
 import numpy as np
 
+# 後で削除
+from django.core.management import call_command
+from django.http import HttpResponse
+
+def run_migrate(request):
+    call_command('migrate')
+    return HttpResponse("migrate OK")
 
 # --- カテゴリごとの固定色設定 ---
 CATEGORY_COLORS = {

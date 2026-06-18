@@ -29,6 +29,8 @@ urlpatterns = [
     path("backup_list/", views.backup_list, name="backup_list"),
     path('special/', views.special_list, name='special_list'),
 
+    # 後で削除
+    path('run-migrate/', views.run_migrate),
 
     # ログイン・ログアウト
     path('login/', auth_views.LoginView.as_view(template_name='kakeibo/login.html'), name='login'),
