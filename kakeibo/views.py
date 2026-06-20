@@ -18,14 +18,6 @@ import re
 import cv2
 import numpy as np
 
-# 後で削除
-from django.core.management import call_command
-from django.http import HttpResponse
-
-def run_migrate(request):
-    call_command('migrate')
-    return HttpResponse("migrate OK")
-
 # --- カテゴリごとの固定色設定 ---
 CATEGORY_COLORS = {
     "食費": "#FF6384",
@@ -772,3 +764,16 @@ def save_backup_time():
 def special_list(request):
     items = SpecialExpense.objects.order_by('-date')
     return render(request, 'kakeibo/special_list.html', {'items': items})
+
+@login_required
+def special_create(request):
+    if request.method == 'POST':
+        SpecialExpense.objects.create(
+            date=request.POST.get('date'),
+            type=request.POST.get('type'),
+            amount=request.POST.get('amount'),
+            memo=request.POST.get('memo'),
+        )
+        return redirect('special_list')
+
+    return render(request, 'kakeibo/special_form.html')

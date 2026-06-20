@@ -1,0 +1,39 @@
+{% extends 'kakeibo/base.html' %}
+{% load humanize %}
+
+{% block content %}
+<h2 class="mb-4">特別費を追加</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label class="form-label">日付</label>
+        <input type="date" name="date" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">種類</label>
+        <select name="type" class="form-control" required>
+            <option value="car">車関連</option>
+            <option value="home">家関連</option>
+            <option value="event">イベント</option>
+            <option value="other">その他</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">金額</label>
+        <input type="number" name="amount" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">メモ</label>
+        <textarea name="memo" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">登録</button>
+    <a href="{% url 'special_list' %}" class="btn btn-secondary">戻る</a>
+</form>
+
+{% endblock %}
