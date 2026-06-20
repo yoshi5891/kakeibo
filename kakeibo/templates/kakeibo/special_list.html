@@ -4,6 +4,8 @@
 {% block content %}
 <h2 class="mb-4">特別費一覧</h2>
 
+<a href="{% url 'special_create' %}" class="btn btn-primary mb-3">特別費を追加</a>
+
 <table class="table table-striped table-hover">
     <thead>
         <tr>
@@ -25,7 +27,7 @@
     </tbody>
 </table>
 
-<a href="{% url 'special_create' %}" class="btn btn-primary mb-3">特別費を追加</a>
 <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">戻る</a>
+
 
 {% endblock %}
