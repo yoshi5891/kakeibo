@@ -791,3 +791,9 @@ def special_edit(request, pk):
         return redirect('special_list')
 
     return render(request, 'kakeibo/special_form.html', {'item': item})
+
+@login_required
+def special_delete(request, pk):
+    item = get_object_or_404(SpecialExpense, pk=pk)
+    item.delete()
+    return redirect('special_list')

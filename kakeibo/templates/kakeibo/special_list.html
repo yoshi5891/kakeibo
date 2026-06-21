@@ -24,7 +24,10 @@
             <td>{{ item.amount|intcomma }} 円</td>
             <td>{{ item.memo }}</td>
             <td>
-                <a href="{% url 'special_edit' item.pk %}" class="btn btn-sm btn-outline-primary">編集</a>
+                <a href="{% url 'special_edit' item.pk %}" class="btn btn-sm btn-outline-primary me-2">編集</a>
+                <a href="{% url 'special_delete' item.pk %}" class="btn btn-sm btn-outline-danger"
+                    onclick="return confirm('本当に削除しますか？');">削除</a>
+
             </td>
         </tr>
         {% endfor %}
