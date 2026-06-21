@@ -777,3 +777,17 @@ def special_create(request):
         return redirect('special_list')
 
     return render(request, 'kakeibo/special_form.html')
+
+@login_required
+def special_edit(request, pk):
+    item = get_object_or_404(SpecialExpense, pk=pk)
+
+    if request.method == 'POST':
+        item.date = request.POST.get('date')
+        item.type = request.POST.get('type')
+        item.amount = request.POST.get('amount')
+        item.memo = request.POST.get('memo')
+        item.save()
+        return redirect('special_list')
+
+    return render(request, 'kakeibo/special_form.html', {'item': item})

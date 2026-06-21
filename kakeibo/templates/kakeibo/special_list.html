@@ -13,6 +13,7 @@
             <th>種類</th>
             <th>金額</th>
             <th>メモ</th>
+            <th>操作</th>
         </tr>
     </thead>
     <tbody>
@@ -22,6 +23,9 @@
             <td>{{ item.get_type_display }}</td>
             <td>{{ item.amount|intcomma }} 円</td>
             <td>{{ item.memo }}</td>
+            <td>
+                <a href="{% url 'special_edit' item.pk %}" class="btn btn-sm btn-outline-primary">編集</a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

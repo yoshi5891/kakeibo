@@ -2,37 +2,43 @@
 {% load humanize %}
 
 {% block content %}
-<h2 class="mb-4">特別費を追加</h2>
+<h2 class="mb-4">
+    {% if item %}特別費を編集{% else %}特別費を追加{% endif %}
+</h2>
 
 <form method="POST">
     {% csrf_token %}
 
     <div class="mb-3">
         <label class="form-label">日付</label>
-        <input type="date" name="date" class="form-control" required>
+        <input type="date" name="date" class="form-control"
+               value="{{ item.date|date:'Y-m-d' }}" required>
     </div>
 
     <div class="mb-3">
         <label class="form-label">種類</label>
         <select name="type" class="form-control" required>
-            <option value="car">車関連</option>
-            <option value="home">家関連</option>
-            <option value="event">イベント</option>
-            <option value="other">その他</option>
+            <option value="car"   {% if item.type == 'car' %}selected{% endif %}>車関連</option>
+            <option value="home"  {% if item.type == 'home' %}selected{% endif %}>家関連</option>
+            <option value="event" {% if item.type == 'event' %}selected{% endif %}>イベント</option>
+            <option value="other" {% if item.type == 'other' %}selected{% endif %}>その他</option>
         </select>
     </div>
 
     <div class="mb-3">
         <label class="form-label">金額</label>
-        <input type="number" name="amount" class="form-control" required>
+        <input type="number" name="amount" class="form-control"
+               value="{{ item.amount }}" required>
     </div>
 
     <div class="mb-3">
         <label class="form-label">メモ</label>
-        <textarea name="memo" class="form-control"></textarea>
+        <textarea name="memo" class="form-control">{{ item.memo }}</textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary">登録</button>
+    <button type="submit" class="btn btn-primary">
+        {% if item %}更新{% else %}登録{% endif %}
+    </button>
     <a href="{% url 'special_list' %}" class="btn btn-secondary">戻る</a>
 </form>
 
