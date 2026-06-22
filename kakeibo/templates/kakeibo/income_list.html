@@ -1,0 +1,34 @@
+{% extends 'kakeibo/base.html' %}
+{% load humanize %}
+
+{% block content %}
+<h2>収入一覧</h2>
+
+<a href="{% url 'income_create' %}" class="btn btn-primary mb-3">収入を追加</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>日付</th>
+            <th>金額</th>
+            <th>メモ</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in incomes %}
+        <tr>
+            <td>{{ item.date }}</td>
+            <td>{{ item.amount|intcomma }} 円</td>
+            <td>{{ item.memo }}</td>
+            <td>
+                <a href="{% url 'income_edit' item.pk %}" class="btn btn-sm btn-outline-primary">編集</a>
+                <a href="{% url 'income_delete' item.pk %}" class="btn btn-sm btn-outline-danger"
+                   onclick="return confirm('削除しますか？');">削除</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

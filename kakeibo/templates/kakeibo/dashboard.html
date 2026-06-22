@@ -39,11 +39,11 @@
         </div>
     </div>
 
-    <!-- 今日の支出 -->
     <div class="col-md-6">
         <div class="card shadow-sm p-3">
-            <h5 class="card-title">今日の支出</h5>
-            <p class="display-6">{{ today_total|intcomma }} 円</p>
+            <h5 class="card-title">今月の残り予算</h5>
+            <p class="display-6">{{ balance|intcomma }} 円</p>
+            <p>（収入：{{ income_total|intcomma }} 円 − 支出：{{ total|intcomma }} 円）</p>
         </div>
     </div>
 
@@ -220,10 +220,6 @@
     });
 </script>
 <!-- ここまで -->
-
-<div class="alert alert-info text-center mt-3">
-    今日の支出：{{ today_total|intcomma }} 円
-</div>
 
 {% if user.is_superuser %}
 <div class="text-center mt-4">

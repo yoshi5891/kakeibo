@@ -1,0 +1,30 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block content %}
+<h2>収入の追加 / 編集</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label class="form-label">日付</label>
+        <input type="date" name="date" class="form-control"
+               value="{{ item.date|default:'' }}">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">金額</label>
+        <input type="number" name="amount" class="form-control"
+               value="{{ item.amount|default:'' }}">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">メモ</label>
+        <input type="text" name="memo" class="form-control"
+               value="{{ item.memo|default:'' }}">
+    </div>
+
+    <button class="btn btn-primary">保存</button>
+</form>
+
+{% endblock %}

@@ -24,6 +24,15 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+# --- 収入 ---
+class Income(models.Model):
+    date = models.DateField()
+    amount = models.IntegerField()
+    memo = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"{self.date} - {self.amount}円"
+
 # --- 支出 ---
 class Expense(models.Model):
     # family = models.ForeignKey(Family, on_delete=models.CASCADE)

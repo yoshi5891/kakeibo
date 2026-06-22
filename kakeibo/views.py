@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from .models import Income
 from .models import Expense, Category
 from .models import SpecialExpense
 from .forms import UploadImageForm
@@ -268,6 +269,14 @@ def dashboard(request):
         date__range=(start_date, end_date)
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
+    # 今月の収入
+    income_total = Income.objects.filter(
+        date__range=(start_date, end_date)
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # 今月の残り予算
+    balance = income_total - total
+
     # 前月合計
     prev_month_total = Expense.objects.filter(
         date__range=(
@@ -311,6 +320,9 @@ def dashboard(request):
         'diff': diff,
         'diff_color': diff_color,
         'special_total': special_total,
+        'income_total': income_total,
+        'balance': balance,
+
     })
 
 
@@ -804,3 +816,39 @@ def special_delete(request, pk):
     item = get_object_or_404(SpecialExpense, pk=pk)
     item.delete()
     return redirect('special_list')
+
+@login_required
+def income_list(request):
+    incomes = Income.objects.order_by('-date')
+    return render(request, 'kakeibo/income_list.html', {'incomes': incomes})
+
+@login_required
+def income_create(request):
+    if request.method == 'POST':
+        Income.objects.create(
+            date=request.POST.get('date'),
+            amount=request.POST.get('amount'),
+            memo=request.POST.get('memo'),
+        )
+        return redirect('income_list')
+
+    return render(request, 'kakeibo/income_form.html')
+
+@login_required
+def income_edit(request, pk):
+    item = get_object_or_404(Income, pk=pk)
+
+    if request.method == 'POST':
+        item.date = request.POST.get('date')
+        item.amount = request.POST.get('amount')
+        item.memo = request.POST.get('memo')
+        item.save()
+        return redirect('income_list')
+
+    return render(request, 'kakeibo/income_form.html', {'item': item})
+
+@login_required
+def income_delete(request, pk):
+    item = get_object_or_404(Income, pk=pk)
+    item.delete()
+    return redirect('income_list')

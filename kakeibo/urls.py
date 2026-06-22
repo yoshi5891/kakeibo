@@ -19,6 +19,14 @@ urlpatterns = [
     path('chart/bar/', views.expense_chart_bar, name='expense_chart_bar'),
 
     # カテゴリ管理
+    path('income/', views.income_list, name='income_list'),
+    path('income/add/', views.income_create, name='income_create'),
+    path('income/<int:pk>/edit/', views.income_edit, name='income_edit'),
+    path('income/<int:pk>/delete/', views.income_delete, name='income_delete'),
+    path('income/', views.income_list, name='income_list'),
+    path('income/add/', views.income_create, name='income_create'),
+    path('income/<int:pk>/edit/', views.income_edit, name='income_edit'),
+    path('income/<int:pk>/delete/', views.income_delete, name='income_delete'),
     path('categories/', views.category_list, name='category_list'),
     path('categories/add/', views.category_add, name='category_add'),
     path('categories/<int:pk>/edit/', views.category_edit, name='category_edit'),
