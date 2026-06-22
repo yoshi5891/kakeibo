@@ -263,6 +263,11 @@ def dashboard(request):
     # 合計
     total = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
+    # 特別費の合計
+    special_total = SpecialExpense.objects.filter(
+        date__range=(start_date, end_date)
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
     # 前月合計
     prev_month_total = Expense.objects.filter(
         date__range=(
@@ -305,7 +310,9 @@ def dashboard(request):
         'prev_month_total': prev_month_total,
         'diff': diff,
         'diff_color': diff_color,
+        'special_total': special_total,
     })
+
 
 @login_required
 def category_list(request):
