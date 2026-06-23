@@ -29,14 +29,14 @@
         <label class="form-label">カテゴリ</label>
 
         <div class="d-flex gap-2">
-            <select name="category" class="form-select" required>
-                {% for category in categories %}
-                    <option value="{{ category.id }}"
-                        {% if initial.category|default:0 == category.id %}
+            <select name="category" class="form-control">
+                {% for c in categories %}
+                    <option value="{{ c.id }}"
+                        {% if expense and expense.category.id == c.id %}
                             selected
                         {% endif %}
                     >
-                        {{ category.name }}
+                        {{ c.name }}
                     </option>
                 {% endfor %}
             </select>

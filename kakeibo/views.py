@@ -227,18 +227,14 @@ def dashboard(request):
 
     month_str = request.GET.get('month')
 
-    # 25日締めの基準日を決定
+    # 表示月は PC の今日の月に合わせる
     if month_str:
         year, month = map(int, month_str.split('-'))
         target_date = date(year, month, 25)
     else:
         today = date.today()
-        if today.day >= 26:
-            target_date = date(today.year, today.month, 25)
-        else:
-            prev = today - relativedelta(months=1)
-            target_date = date(prev.year, prev.month, 25)
-
+        target_date = date(today.year, today.month, 25)
+        
     # 集計期間：前月26日〜当月25日
     start_date = target_date - relativedelta(months=1) + timedelta(days=1)
     end_date = target_date
