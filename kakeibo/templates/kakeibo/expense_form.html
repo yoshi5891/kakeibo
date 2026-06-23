@@ -20,7 +20,8 @@
             name="date"
             class="form-control"
             required
-            value="{{ initial.date|default:'' }}"
+            value="{% if expense %}{{ expense.date|date:'Y-m-d' }}{% else %}{{ initial.date }}{% endif %}"
+
         >
     </div>
 
@@ -56,7 +57,7 @@
     <!-- 金額 -->
     <div class="mb-3">
         <label class="form-label">金額</label>
-        <input type="number" name="amount" class="form-control" value="{{ initial.amount }}">
+        <input type="number" name="amount" class="form-control" value="{% if expense %}{{ expense.amount }}{% else %}{{ initial.amount }}{% endif %}">
     </div>
 
     <!-- メモ（折りたたみ式） -->
@@ -66,9 +67,7 @@
         </button>
 
         <div class="collapse mt-2" id="memoArea">
-            <textarea name="memo" class="form-control" rows="3">
-                {% if expense %}{{ expense.memo }}{% endif %}
-            </textarea>
+           <textarea name="memo" class="form-control" rows="3">{% if expense %}{{ expense.memo }}{% endif %}</textarea>
         </div>
     </div>
 
