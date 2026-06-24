@@ -40,6 +40,7 @@
         <!-- 左側メニュー -->
         <ul class="navbar-nav me-auto">
 
+          <!-- ダッシュボード -->
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
               href="{% url 'dashboard' %}">
@@ -47,6 +48,15 @@
             </a>
           </li>
 
+          <!-- ★ 収入追加（ここに移動） -->
+          <li class="nav-item">
+            <a class="nav-link text-success fw-bold {% if request.resolver_match.url_name == 'income_create' %}active{% endif %}"
+              href="{% url 'income_create' %}">
+              ＋ 収入追加
+            </a>
+          </li>
+
+          <!-- 支出一覧 -->
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'expense_list' %}active{% endif %}"
               href="{% url 'expense_list' %}">
@@ -54,6 +64,7 @@
             </a>
           </li>
 
+          <!-- 支出追加 -->
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'expense_create' %}active{% endif %}"
               href="{% url 'expense_create' %}">
@@ -61,6 +72,7 @@
             </a>
           </li>
 
+          <!-- 月別サマリー -->
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'expense_summary' %}active{% endif %}"
               href="{% url 'expense_summary' %}">
@@ -68,6 +80,7 @@
             </a>
           </li>
 
+          <!-- ヘルプ -->
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'help' %}active{% endif %}"
               href="{% url 'help' %}">
@@ -76,6 +89,7 @@
           </li>
 
         </ul>
+
 
         <!-- 右側メニュー（折りたたみ内に統合） -->
         <ul class="navbar-nav">

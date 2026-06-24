@@ -6,7 +6,18 @@
 
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+
+        <!-- ユーザー名 -->
+        <div class="mb-3">
+            <label class="form-label">ユーザー名</label>
+            <input type="text" name="username" class="form-control" required>
+        </div>
+
+        <!-- パスワード -->
+        <div class="mb-3">
+            <label class="form-label">パスワード</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
 
         <button type="submit" class="btn btn-primary w-100">ログイン</button>
     </form>
