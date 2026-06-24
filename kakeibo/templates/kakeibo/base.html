@@ -72,11 +72,11 @@
             </a>
           </li>
 
-          <!-- 月別サマリー -->
+          <!-- ★ 特別費（ここに変更） -->
           <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'expense_summary' %}active{% endif %}"
-              href="{% url 'expense_summary' %}">
-              月別サマリー
+            <a class="nav-link {% if request.resolver_match.url_name == 'special_list' %}active{% endif %}"
+              href="{% url 'special_list' %}">
+              特別費
             </a>
           </li>
 
@@ -91,6 +91,7 @@
         </ul>
 
 
+
         <!-- 右側メニュー（折りたたみ内に統合） -->
         <ul class="navbar-nav">
           {% if user.is_authenticated %}
@@ -100,9 +101,7 @@
             <li class="nav-item">
               <a class="nav-link text-warning" href="{% url 'logout' %}">ログアウト</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'income_create' %}">収入追加</a>
-            </li>
+            
           {% else %}
             <li class="nav-item">
               <a class="nav-link text-warning" href="{% url 'login' %}">ログイン</a>
