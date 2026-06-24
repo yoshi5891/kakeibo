@@ -90,10 +90,26 @@ def expense_create(request):
 
 @login_required
 def expense_list(request):
-    family = None
     expenses = Expense.objects.all().order_by('-date')
-    return render(request, 'kakeibo/expense_list.html', {'expenses': expenses})
 
+    from collections import OrderedDict
+    weeks = OrderedDict()
+
+    for e in expenses:
+        # ISO週番号（週の開始は月曜）
+        year, week, _ = e.date.isocalendar()
+
+        # 表示用ラベル：2026年 25週 のように
+        label = f"{e.date.year}年 {week}週"
+
+        if label not in weeks:
+            weeks[label] = []
+
+        weeks[label].append(e)
+
+    return render(request, 'kakeibo/expense_list.html', {
+        'weeks': weeks
+    })
 
 @login_required
 def expense_edit(request, pk):
