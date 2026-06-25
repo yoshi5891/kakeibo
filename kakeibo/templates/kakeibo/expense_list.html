@@ -14,8 +14,10 @@
 
 <h2 class="mb-4">支出一覧（週ごと）</h2>
 
-{% for week_label, items in weeks.items %}
-    <h4 class="mt-4 mb-2">{{ week_label }}</h4>
+{% for week_label, week in weeks.items %}
+    <h4 class="mt-4 mb-2">
+        {{ week_label }}（合計：{{ week.total|intcomma }}円）
+    </h4>
 
     <table class="table table-striped table-hover">
         <thead>
@@ -28,7 +30,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for e in items %}
+            {% for e in week.items %}
             <tr>
                 <td>{{ e.date }}</td>
                 <td>{{ e.category }}</td>

@@ -96,21 +96,28 @@ def expense_list(request):
     weeks = OrderedDict()
 
     for e in expenses:
-        # ★ 月内の週番号を計算（1〜5週）
+        # ★ 月内の週番号（1〜5週）
         week = ((e.date.day - 1) // 7) + 1
 
-        # ★ 表示ラベル：2026年 6月 3週 のように
+        # ★ ラベル：2026年 6月 3週
         label = f"{e.date.year}年 {e.date.month}月 {week}週"
 
+        # ★ 初期化（items と total を持つ）
         if label not in weeks:
-            weeks[label] = []
+            weeks[label] = {
+                "items": [],
+                "total": 0
+            }
 
-        weeks[label].append(e)
+        # ★ 週のリストに追加
+        weeks[label]["items"].append(e)
+
+        # ★ 合計金額を加算
+        weeks[label]["total"] += e.amount
 
     return render(request, 'kakeibo/expense_list.html', {
         'weeks': weeks
     })
-
 
 @login_required
 def expense_edit(request, pk):
