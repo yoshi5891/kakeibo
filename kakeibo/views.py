@@ -839,8 +839,45 @@ def special_delete(request, pk):
 
 @login_required
 def income_list(request):
-    incomes = Income.objects.order_by('-date')
-    return render(request, 'kakeibo/income_list.html', {'incomes': incomes})
+    incomes = Income.objects.all().order_by('-date')
+
+    from collections import OrderedDict
+    months = OrderedDict()
+
+    for inc in incomes:
+        d = inc.date
+
+        # ★ 給与月の計算（26日開始・25日締め）
+        if d.day >= 26:
+            salary_year = d.year
+            salary_month = d.month
+        else:
+            # 前月扱い
+            if d.month == 1:
+                salary_year = d.year - 1
+                salary_month = 12
+            else:
+                salary_year = d.year
+                salary_month = d.month - 1
+
+        # ★ ラベル（例：2026年 6月分）
+        label = f"{salary_year}年 {salary_month}月分"
+
+        # ★ 初期化
+        if label not in months:
+            months[label] = {
+                "items": [],
+                "total": 0
+            }
+
+        # ★ 追加
+        months[label]["items"].append(inc)
+        months[label]["total"] += inc.amount
+
+    return render(request, 'kakeibo/income_list.html', {
+        'months': months
+    })
+
 
 @login_required
 def income_create(request):
