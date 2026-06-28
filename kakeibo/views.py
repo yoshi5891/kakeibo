@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Income
 from .models import Expense, Category
-from .models import SpecialExpense
+from .models import SpecialExpense, SpecialType
 from .forms import UploadImageForm
 from .utils.ocr import run_ocr
 from django.utils import timezone
