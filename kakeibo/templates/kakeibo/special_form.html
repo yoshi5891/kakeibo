@@ -18,10 +18,12 @@
     <div class="mb-3">
         <label class="form-label">種類</label>
         <select name="type" class="form-control" required>
-            <option value="car"   {% if item.type == 'car' %}selected{% endif %}>車関連</option>
-            <option value="home"  {% if item.type == 'home' %}selected{% endif %}>家関連</option>
-            <option value="event" {% if item.type == 'event' %}selected{% endif %}>イベント</option>
-            <option value="other" {% if item.type == 'other' %}selected{% endif %}>その他</option>
+            {% for t in types %}
+                <option value="{{ t.id }}"
+                    {% if item and item.type.id == t.id %}selected{% endif %}>
+                    {{ t.name }}
+                </option>
+            {% endfor %}
         </select>
     </div>
 

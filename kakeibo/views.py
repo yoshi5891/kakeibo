@@ -812,13 +812,14 @@ def special_create(request):
     if request.method == 'POST':
         SpecialExpense.objects.create(
             date=request.POST.get('date'),
-            type=request.POST.get('type'),
+            type_id=request.POST.get('type'),
             amount=request.POST.get('amount'),
             memo=request.POST.get('memo'),
         )
         return redirect('special_list')
 
-    return render(request, 'kakeibo/special_form.html')
+    types = SpecialType.objects.all()
+    return render(request, 'kakeibo/special_form.html', {'types': types})
 
 @login_required
 def special_edit(request, pk):
@@ -826,13 +827,17 @@ def special_edit(request, pk):
 
     if request.method == 'POST':
         item.date = request.POST.get('date')
-        item.type = request.POST.get('type')
+        item.type_id = request.POST.get('type')
         item.amount = request.POST.get('amount')
         item.memo = request.POST.get('memo')
         item.save()
         return redirect('special_list')
 
-    return render(request, 'kakeibo/special_form.html', {'item': item})
+    types = SpecialType.objects.all()
+    return render(request, 'kakeibo/special_form.html', {
+        'item': item,
+        'types': types
+    })
 
 @login_required
 def special_delete(request, pk):
