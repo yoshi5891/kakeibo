@@ -719,7 +719,10 @@ def backup_data(request):
             "python",
             "manage.py",
             "dumpdata",
-            "kakeibo",
+            "kakeibo.Income",
+            "kakeibo.Expense",
+            "kakeibo.SpecialExpense",
+            "kakeibo.Category",
             "--indent",
             "2"
         ],
