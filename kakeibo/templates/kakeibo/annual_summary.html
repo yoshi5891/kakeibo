@@ -7,6 +7,7 @@
     <thead>
         <tr>
             <th>月</th>
+            <th>期間</th>
             <th>収入</th>
             <th>支出</th>
             <th>特別費</th>
@@ -17,6 +18,7 @@
         {% for m in monthly %}
         <tr>
             <td>{{ m.month }}月</td>
+            <td>{{ m.start }}〜{{ m.end }}</td>
             <td>{{ m.income }}円</td>
             <td>{{ m.expense }}円</td>
             <td>{{ m.special }}円</td>

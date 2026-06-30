@@ -921,16 +921,16 @@ def income_delete(request, pk):
 @login_required
 def annual_summary(request):
     from datetime import date
-    year = date.today().year
+    from dateutil.relativedelta import relativedelta
+    from calendar import monthrange
 
-    # 月ごとの集計結果を入れる
+    year = date.today().year
     monthly = []
 
     for month in range(1, 13):
-        # 月初・月末
-        start = date(year, month, 1)
-        end_day = monthrange(year, month)[1]
-        end = date(year, month, end_day)
+        # 給与月の締め：前月26日〜当月25日
+        end = date(year, month, 25)
+        start = end - relativedelta(months=1) + timedelta(days=1)
 
         # 支出
         expense_total = Expense.objects.filter(
@@ -947,11 +947,13 @@ def annual_summary(request):
             date__range=(start, end)
         ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-        # 収支（黒字 or 赤字）
+        # 収支
         balance = income_total - (expense_total + special_total)
 
         monthly.append({
             "month": month,
+            "start": start,
+            "end": end,
             "income": income_total,
             "expense": expense_total,
             "special": special_total,
@@ -962,3 +964,4 @@ def annual_summary(request):
         "year": year,
         "monthly": monthly,
     })
+
