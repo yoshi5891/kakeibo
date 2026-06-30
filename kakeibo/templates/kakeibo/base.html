@@ -80,6 +80,11 @@
             </a>
           </li>
 
+          <li class="nav-item">
+              <a class="nav-link" href="{% url 'annual_summary' %}">年間収支</a>
+          </li>
+
+          
           <!-- ヘルプ -->
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'help' %}active{% endif %}"

@@ -1,0 +1,35 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block content %}
+<h2>{{ year }}年 年間収支</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>月</th>
+            <th>収入</th>
+            <th>支出</th>
+            <th>特別費</th>
+            <th>収支（黒字/赤字）</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for m in monthly %}
+        <tr>
+            <td>{{ m.month }}月</td>
+            <td>{{ m.income }}円</td>
+            <td>{{ m.expense }}円</td>
+            <td>{{ m.special }}円</td>
+            <td>
+                {% if m.balance >= 0 %}
+                    <span style="color:blue;">+{{ m.balance }}円</span>
+                {% else %}
+                    <span style="color:red;">{{ m.balance }}円</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

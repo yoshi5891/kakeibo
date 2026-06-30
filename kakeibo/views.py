@@ -917,3 +917,48 @@ def income_delete(request, pk):
     item = get_object_or_404(Income, pk=pk)
     item.delete()
     return redirect('income_list')
+
+@login_required
+def annual_summary(request):
+    from datetime import date
+    year = date.today().year
+
+    # 月ごとの集計結果を入れる
+    monthly = []
+
+    for month in range(1, 13):
+        # 月初・月末
+        start = date(year, month, 1)
+        end_day = monthrange(year, month)[1]
+        end = date(year, month, end_day)
+
+        # 支出
+        expense_total = Expense.objects.filter(
+            date__range=(start, end)
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+        # 特別費
+        special_total = SpecialExpense.objects.filter(
+            date__range=(start, end)
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+        # 収入
+        income_total = Income.objects.filter(
+            date__range=(start, end)
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+        # 収支（黒字 or 赤字）
+        balance = income_total - (expense_total + special_total)
+
+        monthly.append({
+            "month": month,
+            "income": income_total,
+            "expense": expense_total,
+            "special": special_total,
+            "balance": balance,
+        })
+
+    return render(request, "kakeibo/annual_summary.html", {
+        "year": year,
+        "monthly": monthly,
+    })
