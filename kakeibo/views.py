@@ -38,13 +38,8 @@ CATEGORY_KEYWORDS = {
     "交際費": ["映画", "カラオケ", "ゲーム"],
 }
 
-# ============================================================
-#  今日だけ 500 を回避するために family = None に統一
-# ============================================================
-
 @login_required
 def expense_create(request):
-    family = None
 
     # --- カテゴリ追加後の戻りを判定（?from=category_add を使う） ---
     if request.GET.get('from') == 'category_add':
@@ -55,7 +50,10 @@ def expense_create(request):
 
     if request.method == 'POST':
         category_id = request.POST.get('category')
-        category = Category.objects.get(id=category_id)
+        try:
+            category = Category.objects.get(id=category_id)
+        except (Category.DoesNotExist, ValueError, TypeError):
+            return redirect('expense_create')
 
         Expense.objects.create(
             category=category,
@@ -72,7 +70,7 @@ def expense_create(request):
     initial['date'] = date_param if date_param else date.today().strftime('%Y-%m-%d')
 
     category_param = request.GET.get('category')
-    if category_param:
+    if category_param and category_param.isdigit():
         initial['category'] = int(category_param)
 
     categories = Category.objects.all()
@@ -121,12 +119,14 @@ def expense_list(request):
 
 @login_required
 def expense_edit(request, pk):
-    family = None
     expense = get_object_or_404(Expense, pk=pk)
 
     if request.method == 'POST':
         category_id = request.POST.get('category')
-        category = Category.objects.get(id=category_id)
+        try:
+            category = Category.objects.get(id=category_id)
+        except (Category.DoesNotExist, ValueError, TypeError):
+            return redirect('expense_edit', pk=pk)
 
         expense.date = request.POST.get('date')
         expense.category = category
@@ -146,7 +146,6 @@ def expense_edit(request, pk):
 
 @login_required
 def expense_delete(request, pk):
-    family = None
     expense = get_object_or_404(Expense, pk=pk)
     expense.delete()
     return redirect('expense_list')
@@ -154,7 +153,6 @@ def expense_delete(request, pk):
 
 @login_required
 def expense_summary(request):
-    family = None
 
     today = timezone.now()
     month_start = today.replace(day=1)
@@ -172,7 +170,6 @@ def expense_summary(request):
 
 @login_required
 def expense_chart(request):
-    family = None
 
     data = Expense.objects.values('category__name').annotate(total=Sum('amount'))
 
@@ -187,7 +184,6 @@ def expense_chart(request):
 
 @login_required
 def expense_summary_month(request, year, month):
-    family = None
 
     # 当月25日を締め日とする
     month_end = date(year, month, 25)
@@ -214,7 +210,6 @@ def expense_summary_month(request, year, month):
 
 @login_required
 def expense_filter(request):
-    family = None
     expenses = None
 
     if request.method == 'POST':
@@ -232,7 +227,6 @@ def expense_filter(request):
 
 @login_required
 def expense_chart_bar(request):
-    family = None
 
     data = Expense.objects.values('category__name').annotate(total=Sum('amount'))
 
@@ -247,7 +241,6 @@ def expense_chart_bar(request):
 @login_required
 def dashboard(request):
 
-    family = None
 
     month_str = request.GET.get('month')
 
@@ -348,7 +341,6 @@ def dashboard(request):
 
 @login_required
 def category_list(request):
-    family = None
     categories = Category.objects.all()
 
     for c in categories:
@@ -360,7 +352,6 @@ def category_list(request):
 
 @login_required
 def category_add(request):
-    family = None
 
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -374,7 +365,6 @@ def category_add(request):
 
 @login_required
 def category_edit(request, pk):
-    family = None
     category = get_object_or_404(Category, pk=pk)
 
     if request.method == 'POST':
@@ -387,7 +377,6 @@ def category_edit(request, pk):
 
 @login_required
 def category_delete(request, pk):
-    family = None
     category = get_object_or_404(Category, pk=pk)
     category.delete()
     return redirect('category_list')
@@ -508,7 +497,14 @@ def upload_image(request):
 
             total = extract_total(text)
             date = extract_date(text)
-            category_id = estimate_category(text)
+
+            # カテゴリ名 → ID に変換（IDが取れなければパラメータに付けない）
+            category_id = None
+            category_name = estimate_category(text)
+            if category_name:
+                category_obj = Category.objects.filter(name=category_name).first()
+                if category_obj:
+                    category_id = category_obj.id
 
             params = []
             if total:
@@ -598,7 +594,7 @@ def restore_data(request):
     url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/backups"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=10)
 
     if response.status_code != 200:
         return HttpResponse(
@@ -634,7 +630,7 @@ def restore_data(request):
     # --- ③ ダウンロード URL ---
     download_url = target["download_url"]
 
-    download_response = requests.get(download_url)
+    download_response = requests.get(download_url, timeout=30)
 
     if download_response.status_code != 200:
         return HttpResponse(
@@ -685,7 +681,7 @@ def backup_list(request):
     url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/backups"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=10)
 
     if response.status_code != 200:
         return HttpResponse(
@@ -745,11 +741,6 @@ def backup_data(request):
     import zipfile
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         zipf.write(json_path, arcname="data.json")
-
-        # .env があれば追加
-        env_path = os.path.join(settings.BASE_DIR, ".env")
-        if os.path.exists(env_path):
-            zipf.write(env_path, arcname=".env")
 
         # metadata
         metadata_path = "/tmp/metadata.txt"
