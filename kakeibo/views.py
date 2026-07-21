@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from .models import Income
-from .models import Expense, Category
+from .models import Expense, Category, FixedCost
 from .models import SpecialExpense, SpecialType
 from .forms import UploadImageForm
 from .utils.ocr import run_ocr
+from .recurring import sync_fixed_costs
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum
@@ -55,12 +56,32 @@ def expense_create(request):
         except (Category.DoesNotExist, ValueError, TypeError):
             return redirect('expense_create')
 
-        Expense.objects.create(
-            category=category,
-            date=request.POST.get('date'),
-            amount=request.POST.get('amount'),
-            memo=request.POST.get('memo'),
-        )
+        expense_date = request.POST.get('date')
+        amount = request.POST.get('amount')
+        memo = request.POST.get('memo')
+
+        if request.POST.get('is_fixed'):
+            fixed_cost = FixedCost.objects.create(
+                name=memo or category.name,
+                amount=amount,
+                category=category,
+                day=datetime.strptime(expense_date, '%Y-%m-%d').day,
+                start_date=expense_date,
+            )
+            Expense.objects.create(
+                category=category,
+                date=expense_date,
+                amount=amount,
+                memo=memo,
+                fixed_cost=fixed_cost,
+            )
+        else:
+            Expense.objects.create(
+                category=category,
+                date=expense_date,
+                amount=amount,
+                memo=memo,
+            )
         return redirect('expense_list')
 
     initial = {}
@@ -88,6 +109,7 @@ def expense_create(request):
 
 @login_required
 def expense_list(request):
+    sync_fixed_costs()
     expenses = Expense.objects.all().order_by('-date')
 
     from collections import OrderedDict
@@ -241,6 +263,7 @@ def expense_chart_bar(request):
 @login_required
 def dashboard(request):
 
+    sync_fixed_costs()
 
     month_str = request.GET.get('month')
 

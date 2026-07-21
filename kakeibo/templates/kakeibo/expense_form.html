@@ -71,6 +71,16 @@
         </div>
     </div>
 
+    {% if not expense %}
+    <!-- 毎月の固定費として登録 -->
+    <div class="mb-3 form-check">
+        <input type="checkbox" name="is_fixed" value="1" class="form-check-input" id="isFixedCheck">
+        <label class="form-check-label" for="isFixedCheck">
+            毎月の固定費として登録する（翌月以降も自動で入力されます）
+        </label>
+    </div>
+    {% endif %}
+
     <button type="submit" class="btn btn-primary">
         {% if expense %}更新{% else %}登録{% endif %}
     </button>

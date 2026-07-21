@@ -34,6 +34,6 @@ class ExpenseAdmin(admin.ModelAdmin):
 
 @admin.register(FixedCost)
 class FixedCostAdmin(admin.ModelAdmin):
-    list_display = ('name', 'amount', 'category', 'created_at')
-    list_filter = ('category',)
+    list_display = ('name', 'amount', 'category', 'day', 'start_date', 'is_active')
+    list_filter = ('category', 'is_active')
     search_fields = ('name',)
