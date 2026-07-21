@@ -7,7 +7,7 @@ from .models import Expense, FixedCost
 
 
 def sync_fixed_costs(upto=None):
-    """有効な固定費について、最終生成月の翌月から upto 月までの Expense を自動作成する。
+    """有効な定額費について、最終生成月の翌月から upto 月までの Expense を自動作成する。
 
     生成済みかどうかは last_generated（生成カーソル）で判定する。Expense の存在有無では
     判定しない。ユーザーが生成済みの支出を削除しても、その月は「生成済み」のまま扱われ、

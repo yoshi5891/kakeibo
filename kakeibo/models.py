@@ -45,7 +45,7 @@ class Expense(models.Model):
     memo = models.CharField(max_length=200, blank=True)
     receipt_image = models.ImageField(upload_to='receipts/', blank=True, null=True)
     fixed_cost = models.ForeignKey(
-        'FixedCost', verbose_name="固定費", null=True, blank=True,
+        'FixedCost', verbose_name="定額費", null=True, blank=True,
         on_delete=models.SET_NULL, related_name='expenses',
     )
 
@@ -53,9 +53,9 @@ class Expense(models.Model):
         return f"{self.date} - {self.amount}円"
 
 
-# --- 固定費 ---
+# --- 定額費（毎月同額で自動生成される固定費） ---
 class FixedCost(models.Model):
-    name = models.CharField("固定費名", max_length=100)
+    name = models.CharField("定額費名", max_length=100)
     amount = models.IntegerField("金額")
     category = models.ForeignKey(Category, verbose_name="カテゴリ", on_delete=models.CASCADE)
     day = models.PositiveSmallIntegerField("支払日（毎月）", default=1)
@@ -65,8 +65,8 @@ class FixedCost(models.Model):
     created_at = models.DateTimeField("登録日", auto_now_add=True)
 
     class Meta:
-        verbose_name = "固定費"
-        verbose_name_plural = "固定費一覧"
+        verbose_name = "定額費"
+        verbose_name_plural = "定額費一覧"
 
     def __str__(self):
         return f"{self.name} - {self.amount}円"
