@@ -60,6 +60,7 @@ class FixedCost(models.Model):
     category = models.ForeignKey(Category, verbose_name="カテゴリ", on_delete=models.CASCADE)
     day = models.PositiveSmallIntegerField("支払日（毎月）", default=1)
     start_date = models.DateField("開始月", default=timezone.now)
+    last_generated = models.DateField("最終生成月", null=True, blank=True)
     is_active = models.BooleanField("有効", default=True)
     created_at = models.DateTimeField("登録日", auto_now_add=True)
 

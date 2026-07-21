@@ -61,12 +61,14 @@ def expense_create(request):
         memo = request.POST.get('memo')
 
         if request.POST.get('is_fixed'):
+            first_date = datetime.strptime(expense_date, '%Y-%m-%d').date()
             fixed_cost = FixedCost.objects.create(
                 name=memo or category.name,
                 amount=amount,
                 category=category,
-                day=datetime.strptime(expense_date, '%Y-%m-%d').day,
-                start_date=expense_date,
+                day=first_date.day,
+                start_date=first_date,
+                last_generated=first_date.replace(day=1),
             )
             Expense.objects.create(
                 category=category,
