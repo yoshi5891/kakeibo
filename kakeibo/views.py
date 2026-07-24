@@ -28,6 +28,9 @@ CATEGORY_COLORS = {
     "交際費": "#4BC0C0",
     "その他": "#9966FF",
     "固定費": "#8BC34A",
+    "定額費": "#FF9800",
+    "雑費": "#795548",
+    "貯蓄・投資": "#00BCD4",
     "(み)こづかい": "#FF43D3",
     "(よ)こづかい": "#434CFF",
 }
@@ -977,8 +980,16 @@ def annual_summary(request):
             "balance": balance,
         })
 
+    totals = {
+        "income": sum(m["income"] for m in monthly),
+        "expense": sum(m["expense"] for m in monthly),
+        "special": sum(m["special"] for m in monthly),
+        "balance": sum(m["balance"] for m in monthly),
+    }
+
     return render(request, "kakeibo/annual_summary.html", {
         "year": year,
         "monthly": monthly,
+        "totals": totals,
     })
 

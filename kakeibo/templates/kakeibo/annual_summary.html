@@ -1,4 +1,5 @@
 {% extends 'kakeibo/base.html' %}
+{% load humanize %}
 
 {% block content %}
 <h2>{{ year }}年 年間収支</h2>
@@ -19,19 +20,34 @@
         <tr>
             <td>{{ m.month }}月</td>
             <td>{{ m.start }}〜{{ m.end }}</td>
-            <td>{{ m.income }}円</td>
-            <td>{{ m.expense }}円</td>
-            <td>{{ m.special }}円</td>
+            <td>{{ m.income|intcomma }}円</td>
+            <td>{{ m.expense|intcomma }}円</td>
+            <td>{{ m.special|intcomma }}円</td>
             <td>
                 {% if m.balance >= 0 %}
-                    <span style="color:blue;">+{{ m.balance }}円</span>
+                    <span style="color:blue;">+{{ m.balance|intcomma }}円</span>
                 {% else %}
-                    <span style="color:red;">{{ m.balance }}円</span>
+                    <span style="color:red;">{{ m.balance|intcomma }}円</span>
                 {% endif %}
             </td>
         </tr>
         {% endfor %}
     </tbody>
+    <tfoot>
+        <tr class="fw-bold">
+            <td colspan="2">合計</td>
+            <td>{{ totals.income|intcomma }}円</td>
+            <td>{{ totals.expense|intcomma }}円</td>
+            <td>{{ totals.special|intcomma }}円</td>
+            <td>
+                {% if totals.balance >= 0 %}
+                    <span style="color:blue;">+{{ totals.balance|intcomma }}円</span>
+                {% else %}
+                    <span style="color:red;">{{ totals.balance|intcomma }}円</span>
+                {% endif %}
+            </td>
+        </tr>
+    </tfoot>
 </table>
 
 {% endblock %}
