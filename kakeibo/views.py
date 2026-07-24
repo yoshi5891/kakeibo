@@ -744,6 +744,7 @@ def backup_data(request):
             "kakeibo.Expense",
             "kakeibo.SpecialExpense",
             "kakeibo.Category",
+            "kakeibo.FixedCost",
             "--indent",
             "2"
         ],
