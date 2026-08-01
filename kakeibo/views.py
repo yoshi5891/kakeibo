@@ -115,7 +115,11 @@ def expense_create(request):
 @login_required
 def expense_list(request):
     sync_fixed_costs()
+    query = request.GET.get('q', '').strip()
+
     expenses = Expense.objects.all().order_by('-date')
+    if query:
+        expenses = expenses.filter(memo__icontains=query)
 
     from collections import OrderedDict
     weeks = OrderedDict()
@@ -141,7 +145,8 @@ def expense_list(request):
         weeks[label]["total"] += e.amount
 
     return render(request, 'kakeibo/expense_list.html', {
-        'weeks': weeks
+        'weeks': weeks,
+        'query': query,
     })
 
 @login_required

@@ -14,6 +14,19 @@
 
 <h2 class="mb-4">支出一覧（週ごと）</h2>
 
+<form method="GET" class="mb-4 d-flex" style="max-width: 400px; gap: 0.5rem;">
+    <input type="text" name="q" value="{{ query }}" class="form-control"
+           placeholder="メモを検索（例：スーパー）">
+    <button type="submit" class="btn btn-primary text-nowrap">検索</button>
+    {% if query %}
+        <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary text-nowrap">クリア</a>
+    {% endif %}
+</form>
+
+{% if query and not weeks %}
+<p class="text-muted">「{{ query }}」に一致するメモは見つかりませんでした。</p>
+{% endif %}
+
 {% for week_label, week in weeks.items %}
     <h4 class="mt-4 mb-2">
         {{ week_label }}（合計：{{ week.total|intcomma }}円）
