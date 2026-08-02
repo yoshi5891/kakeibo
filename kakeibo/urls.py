@@ -39,6 +39,10 @@ urlpatterns = [
     path('special/add/', views.special_create, name='special_create'),
     path('special/<int:pk>/edit/', views.special_edit, name='special_edit'),
     path('special/<int:pk>/delete/', views.special_delete, name='special_delete'),
+    path('special/types/', views.special_type_list, name='special_type_list'),
+    path('special/types/add/', views.special_type_add, name='special_type_add'),
+    path('special/types/<int:pk>/edit/', views.special_type_edit, name='special_type_edit'),
+    path('special/types/<int:pk>/delete/', views.special_type_delete, name='special_type_delete'),
 
     # ログイン・ログアウト
     path('login/', auth_views.LoginView.as_view(template_name='kakeibo/login.html'), name='login'),

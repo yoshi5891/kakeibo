@@ -1,0 +1,30 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+
+        <h2 class="mb-4">
+            {% if special_type %}
+                種類を編集
+            {% else %}
+                種類を追加
+            {% endif %}
+        </h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="name" class="form-label">種類名</label>
+                <input type="text" name="name" id="name" class="form-control" required value="{{ special_type.name|default:'' }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">保存</button>
+            <a href="{% url 'special_type_list' %}" class="btn btn-secondary mt-3">戻る</a>
+
+        </form>
+
+    </div>
+</div>
+{% endblock %}

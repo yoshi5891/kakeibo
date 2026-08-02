@@ -17,14 +17,33 @@
 
     <div class="mb-3">
         <label class="form-label">種類</label>
-        <select name="type" class="form-control" required>
-            {% for t in types %}
-                <option value="{{ t.id }}"
-                    {% if item and item.type.id == t.id %}selected{% endif %}>
-                    {{ t.name }}
-                </option>
-            {% endfor %}
-        </select>
+
+        <div class="d-flex gap-2">
+            <select name="type" class="form-control" required>
+                {% for t in types %}
+                    <option value="{{ t.id }}"
+                        {% if item and item.type.id == t.id %}selected{% endif %}>
+                        {{ t.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <!-- 種類追加 -->
+            <a href="{% url 'special_type_add' %}" class="btn btn-success">
+                ＋
+            </a>
+
+            <!-- 種類一覧（削除可能） -->
+            <a href="{% url 'special_type_list' %}" class="btn btn-outline-danger">
+                🗂
+            </a>
+        </div>
+
+        {% if not types %}
+            <div class="form-text text-danger">
+                特別費の種類が登録されていません。「＋」から種類を追加してください。
+            </div>
+        {% endif %}
     </div>
 
     <div class="mb-3">

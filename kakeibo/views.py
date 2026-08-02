@@ -871,6 +871,41 @@ def special_delete(request, pk):
     return redirect('special_list')
 
 @login_required
+def special_type_list(request):
+    types = SpecialType.objects.all()
+
+    for t in types:
+        t.count = SpecialExpense.objects.filter(type=t).count()
+
+    return render(request, 'kakeibo/special_type_list.html', {'types': types})
+
+@login_required
+def special_type_add(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        SpecialType.objects.create(name=name)
+        return redirect('special_type_list')
+
+    return render(request, 'kakeibo/special_type_form.html')
+
+@login_required
+def special_type_edit(request, pk):
+    special_type = get_object_or_404(SpecialType, pk=pk)
+
+    if request.method == 'POST':
+        special_type.name = request.POST.get('name')
+        special_type.save()
+        return redirect('special_type_list')
+
+    return render(request, 'kakeibo/special_type_form.html', {'special_type': special_type})
+
+@login_required
+def special_type_delete(request, pk):
+    special_type = get_object_or_404(SpecialType, pk=pk)
+    special_type.delete()
+    return redirect('special_type_list')
+
+@login_required
 def income_list(request):
     incomes = Income.objects.all().order_by('-date')
 
