@@ -48,14 +48,6 @@
             </a>
           </li>
 
-          <!-- ★ 収入追加（ここに移動） -->
-          <li class="nav-item">
-            <a class="nav-link text-success fw-bold {% if request.resolver_match.url_name == 'income_create' %}active{% endif %}"
-              href="{% url 'income_create' %}">
-              ＋ 収入追加
-            </a>
-          </li>
-
           <!-- 収入一覧 -->
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'income_list' %}active{% endif %}"
