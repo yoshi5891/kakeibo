@@ -56,6 +56,14 @@
             </a>
           </li>
 
+          <!-- 収入一覧 -->
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'income_list' %}active{% endif %}"
+              href="{% url 'income_list' %}">
+              収入一覧
+            </a>
+          </li>
+
           <!-- 支出一覧 -->
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'expense_list' %}active{% endif %}"
