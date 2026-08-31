@@ -6,8 +6,6 @@
 {% block content %}
 <a href="{% url 'expense_create' %}" class="btn btn-primary mb-3">＋ 新規追加</a>
 
-<a href="{% url 'expense_summary' %}" class="btn btn-info mb-3">📊 今月の集計</a>
-
 <a href="{% url 'expense_chart' %}" class="btn btn-warning mb-3">📈 カテゴリ別グラフ</a>
 
 <a href="{% url 'expense_filter' %}" class="btn btn-secondary mb-3">📅 期間で絞り込み</a>
@@ -16,7 +14,7 @@
 
 <form method="GET" class="mb-4 d-flex" style="max-width: 400px; gap: 0.5rem;">
     <input type="text" name="q" value="{{ query }}" class="form-control"
-           placeholder="メモを検索（例：スーパー）">
+           placeholder="メモ・カテゴリを検索（例：スーパー）">
     <button type="submit" class="btn btn-primary text-nowrap">検索</button>
     {% if query %}
         <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary text-nowrap">クリア</a>
@@ -24,7 +22,7 @@
 </form>
 
 {% if query and not weeks %}
-<p class="text-muted">「{{ query }}」に一致するメモは見つかりませんでした。</p>
+<p class="text-muted">「{{ query }}」に一致するメモ・カテゴリは見つかりませんでした。</p>
 {% endif %}
 
 {% for week_label, week in weeks.items %}

@@ -5,9 +5,8 @@ from .models import SpecialExpense, SpecialType
 from .forms import UploadImageForm
 from .utils.ocr import run_ocr
 from .recurring import sync_fixed_costs
-from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -119,7 +118,9 @@ def expense_list(request):
 
     expenses = Expense.objects.all().order_by('-date')
     if query:
-        expenses = expenses.filter(memo__icontains=query)
+        expenses = expenses.filter(
+            Q(memo__icontains=query) | Q(category__name__icontains=query)
+        )
 
     from collections import OrderedDict
     weeks = OrderedDict()
@@ -181,23 +182,6 @@ def expense_delete(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
     expense.delete()
     return redirect('expense_list')
-
-
-@login_required
-def expense_summary(request):
-
-    today = timezone.now()
-    month_start = today.replace(day=1)
-
-    total = Expense.objects.filter(
-        date__gte=month_start,
-        date__lte=today
-    ).aggregate(Sum('amount'))['amount__sum'] or 0
-
-    return render(request, 'kakeibo/expense_summary.html', {
-        'total': total,
-        'month': today.strftime('%Y年%m月')
-    })
 
 
 @login_required

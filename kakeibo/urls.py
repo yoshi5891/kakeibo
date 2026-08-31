@@ -10,7 +10,6 @@ urlpatterns = [
     path('edit/<int:pk>/', views.expense_edit, name='expense_edit'),
     path('delete/<int:pk>/', views.expense_delete, name='expense_delete'),
 
-    path('summary/', views.expense_summary, name='expense_summary'),
     path('summary/<int:year>/<int:month>/', views.expense_summary_month, name='expense_summary_month'),
 
     path('filter/', views.expense_filter, name='expense_filter'),
