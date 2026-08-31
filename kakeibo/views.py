@@ -795,16 +795,7 @@ def backup_data(request):
             f"GitHub upload failed<br><pre>{upload_result.stderr}</pre>"
         )
 
-    return HttpResponse(
-        f"""
-        Backup completed.<br><br>
-        File: backup-{timestamp}.zip<br><br>
-        <pre>
-        {upload_result.stdout}
-        {upload_result.stderr}
-        </pre>
-        """
-    )
+    return redirect('login')
 
 BACKUP_TIME_FILE = "last_backup.txt"
 
