@@ -17,6 +17,11 @@ urlpatterns = [
     path('chart/', views.expense_chart, name='expense_chart'),
     path('chart/bar/', views.expense_chart_bar, name='expense_chart_bar'),
 
+    # 定額費管理
+    path('fixedcosts/', views.fixedcost_list, name='fixedcost_list'),
+    path('fixedcosts/<int:pk>/edit/', views.fixedcost_edit, name='fixedcost_edit'),
+    path('fixedcosts/<int:pk>/delete/', views.fixedcost_delete, name='fixedcost_delete'),
+
     # カテゴリ管理
     path('income/', views.income_list, name='income_list'),
     path('income/add/', views.income_create, name='income_create'),

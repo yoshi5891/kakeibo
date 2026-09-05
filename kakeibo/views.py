@@ -185,6 +185,46 @@ def expense_delete(request, pk):
 
 
 @login_required
+def fixedcost_list(request):
+    items = FixedCost.objects.all().order_by('-is_active', 'day')
+    return render(request, 'kakeibo/fixedcost_list.html', {'items': items})
+
+
+@login_required
+def fixedcost_edit(request, pk):
+    item = get_object_or_404(FixedCost, pk=pk)
+
+    if request.method == 'POST':
+        category_id = request.POST.get('category')
+        try:
+            category = Category.objects.get(id=category_id)
+        except (Category.DoesNotExist, ValueError, TypeError):
+            return redirect('fixedcost_edit', pk=pk)
+
+        item.name = request.POST.get('name')
+        item.amount = request.POST.get('amount')
+        item.category = category
+        item.day = request.POST.get('day')
+        item.is_active = bool(request.POST.get('is_active'))
+        item.save()
+
+        return redirect('fixedcost_list')
+
+    categories = Category.objects.all()
+    return render(request, 'kakeibo/fixedcost_form.html', {
+        'item': item,
+        'categories': categories,
+    })
+
+
+@login_required
+def fixedcost_delete(request, pk):
+    item = get_object_or_404(FixedCost, pk=pk)
+    item.delete()
+    return redirect('fixedcost_list')
+
+
+@login_required
 def expense_chart(request):
 
     data = Expense.objects.values('category__name').annotate(total=Sum('amount'))

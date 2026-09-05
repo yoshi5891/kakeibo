@@ -1,0 +1,48 @@
+{% extends 'kakeibo/base.html' %}
+
+{% block title %}定額費を編集{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">定額費を編集</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label class="form-label">名前</label>
+        <input type="text" name="name" class="form-control" value="{{ item.name }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">カテゴリ</label>
+        <select name="category" class="form-control" required>
+            {% for c in categories %}
+                <option value="{{ c.id }}" {% if item.category.id == c.id %}selected{% endif %}>
+                    {{ c.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">金額</label>
+        <input type="number" name="amount" class="form-control" value="{{ item.amount }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">支払日（毎月）</label>
+        <input type="number" name="day" class="form-control" min="1" max="31" value="{{ item.day }}" required>
+    </div>
+
+    <div class="mb-3 form-check">
+        <input type="checkbox" name="is_active" value="1" class="form-check-input" id="isActiveCheck"
+               {% if item.is_active %}checked{% endif %}>
+        <label class="form-check-label" for="isActiveCheck">
+            有効（毎月自動で支出を生成する）
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">更新</button>
+    <a href="{% url 'fixedcost_list' %}" class="btn btn-secondary">戻る</a>
+</form>
+{% endblock %}

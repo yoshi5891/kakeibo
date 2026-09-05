@@ -1,0 +1,51 @@
+{% extends 'kakeibo/base.html' %}
+{% load humanize %}
+
+{% block title %}定額費一覧{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">定額費一覧</h2>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>名前</th>
+            <th>カテゴリ</th>
+            <th>金額</th>
+            <th>支払日</th>
+            <th>状態</th>
+            <th>最終生成月</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.amount|intcomma }}円</td>
+            <td>毎月{{ item.day }}日</td>
+            <td>
+                {% if item.is_active %}
+                    <span class="badge bg-success">有効</span>
+                {% else %}
+                    <span class="badge bg-secondary">停止中</span>
+                {% endif %}
+            </td>
+            <td>{{ item.last_generated|date:'Y年n月'|default:'-' }}</td>
+            <td>
+                <a href="{% url 'fixedcost_edit' item.pk %}" class="btn btn-sm btn-primary">編集</a>
+                <a href="{% url 'fixedcost_delete' item.pk %}" class="btn btn-sm btn-danger"
+                   onclick="return confirm('本当に削除しますか？（過去に生成済みの支出データは残ります）');">
+                    削除
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-muted">登録されている定額費はありません。支出登録画面で「毎月の定額費として登録する」にチェックを入れると、ここに表示されます。</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'expense_list' %}" class="btn btn-secondary mt-3">戻る</a>
+{% endblock %}
