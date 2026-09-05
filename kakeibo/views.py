@@ -165,6 +165,19 @@ def expense_edit(request, pk):
         expense.category = category
         expense.amount = request.POST.get('amount')
         expense.memo = request.POST.get('memo')
+
+        if not expense.fixed_cost_id and request.POST.get('is_fixed'):
+            first_date = datetime.strptime(request.POST.get('date'), '%Y-%m-%d').date()
+            fixed_cost = FixedCost.objects.create(
+                name=expense.memo or category.name,
+                amount=expense.amount,
+                category=category,
+                day=first_date.day,
+                start_date=first_date,
+                last_generated=first_date.replace(day=1),
+            )
+            expense.fixed_cost = fixed_cost
+
         expense.save()
 
         return redirect('expense_list')

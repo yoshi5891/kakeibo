@@ -71,12 +71,20 @@
         </div>
     </div>
 
-    {% if not expense %}
+    {% if expense and expense.fixed_cost %}
+    <!-- 既に定額費と連動している場合 -->
+    <div class="mb-3">
+        <span class="badge bg-info text-dark">定額費「{{ expense.fixed_cost.name }}」と連動しています</span>
+        <a href="{% url 'fixedcost_edit' expense.fixed_cost.id %}" class="btn btn-sm btn-outline-secondary ms-2">
+            定額費を編集
+        </a>
+    </div>
+    {% else %}
     <!-- 毎月の定額費として登録 -->
     <div class="mb-3 form-check">
         <input type="checkbox" name="is_fixed" value="1" class="form-check-input" id="isFixedCheck">
         <label class="form-check-label" for="isFixedCheck">
-            毎月の定額費として登録する（翌月以降も自動で入力されます）
+            毎月の定額費として登録する（{% if expense %}次回以降も{% else %}翌月以降も{% endif %}自動で入力されます）
         </label>
     </div>
     {% endif %}
