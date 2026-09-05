@@ -14,17 +14,38 @@
 
 <h2 class="mb-4">支出一覧（週ごと）</h2>
 
+<div class="d-flex justify-content-between align-items-center my-3">
+    <a href="?month={{ prev_month }}{% if query %}&q={{ query }}{% endif %}" class="btn btn-outline-secondary">
+        ← 前月
+    </a>
+
+    <span class="fw-bold" style="font-size: 1.2rem;">
+        {{ display_month }}分（26日〜25日）
+    </span>
+
+    <a href="?month={{ next_month }}{% if query %}&q={{ query }}{% endif %}" class="btn btn-outline-secondary">
+        翌月 →
+    </a>
+</div>
+
+<div class="alert alert-secondary text-center">
+    この期間の合計：{{ month_total|intcomma }} 円
+</div>
+
 <form method="GET" class="mb-4 d-flex" style="max-width: 400px; gap: 0.5rem;">
+    <input type="hidden" name="month" value="{{ month_param }}">
     <input type="text" name="q" value="{{ query }}" class="form-control"
            placeholder="メモ・カテゴリを検索（例：スーパー）">
     <button type="submit" class="btn btn-primary text-nowrap">検索</button>
     {% if query %}
-        <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary text-nowrap">クリア</a>
+        <a href="?month={{ month_param }}" class="btn btn-outline-secondary text-nowrap">クリア</a>
     {% endif %}
 </form>
 
 {% if query and not weeks %}
 <p class="text-muted">「{{ query }}」に一致するメモ・カテゴリは見つかりませんでした。</p>
+{% elif not weeks %}
+<p class="text-muted">この期間の支出データはありません。</p>
 {% endif %}
 
 {% for week_label, week in weeks.items %}

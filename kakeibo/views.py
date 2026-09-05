@@ -116,11 +116,28 @@ def expense_list(request):
     sync_fixed_costs()
     query = request.GET.get('q', '').strip()
 
-    expenses = Expense.objects.all().order_by('-date')
+    # 集計期間：前月26日〜当月25日（ダッシュボードと同じ区切り）
+    month_str = request.GET.get('month')
+    if month_str:
+        year, month = map(int, month_str.split('-'))
+        target_date = date(year, month, 25)
+    else:
+        today = date.today()
+        target_date = date(today.year, today.month, 25)
+
+    start_date = target_date - relativedelta(months=1) + timedelta(days=1)
+    end_date = target_date
+
+    prev_month_date = target_date - relativedelta(months=1)
+    next_month_date = target_date + relativedelta(months=1)
+
+    expenses = Expense.objects.filter(date__range=(start_date, end_date)).order_by('-date')
     if query:
         expenses = expenses.filter(
             Q(memo__icontains=query) | Q(category__name__icontains=query)
         )
+
+    month_total = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
     from collections import OrderedDict
     weeks = OrderedDict()
@@ -148,6 +165,11 @@ def expense_list(request):
     return render(request, 'kakeibo/expense_list.html', {
         'weeks': weeks,
         'query': query,
+        'display_month': target_date.strftime('%Y年%m月'),
+        'month_param': target_date.strftime('%Y-%m'),
+        'prev_month': prev_month_date.strftime('%Y-%m'),
+        'next_month': next_month_date.strftime('%Y-%m'),
+        'month_total': month_total,
     })
 
 @login_required
